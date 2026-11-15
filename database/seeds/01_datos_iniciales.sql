@@ -20,13 +20,13 @@ INSERT INTO personas (nombres, apellidos, telefono, direccion, tipo_persona) VAL
 ('Ana', 'Roca Beltrán', '77567890', 'Av. Ballivián #567, Calacoto', 'CIUDADANO');
 
 -- 3. Usuarios
--- Nota: En producción usar hashes reales (bcrypt/argon2); estos son ejemplos para pruebas
+-- Hashes reales con werkzeug scrypt. Cuentas de prueba: admin/admin123, operador1/operador123, bombero_jorge y bombero_mario/bombero123, ciudadano_ana/ciudadano123
 INSERT INTO usuarios (id_persona, id_rol, nombre_usuario, hash_contrasena, estado) VALUES
-(1, 1, 'admin', 'scrypt:32768:8:1$admin123$hash_placeholder', 'ACTIVO'),
-(2, 2, 'operador1', 'scrypt:32768:8:1$operador123$hash_placeholder', 'ACTIVO'),
-(3, 3, 'bombero_jorge', 'scrypt:32768:8:1$bombero123$hash_placeholder', 'ACTIVO'),
-(4, 3, 'bombero_mario', 'scrypt:32768:8:1$bombero123$hash_placeholder', 'ACTIVO'),
-(5, 4, 'ciudadano_ana', 'scrypt:32768:8:1$ciudadano123$hash_placeholder', 'ACTIVO')
+(1, 1, 'admin', 'scrypt:32768:8:1$ZOmyWe0dohIP91vb$c9e327ebe7c3127d21b4cad46aa41921dba77444296adce99fe2fe378b2847dae635d7bb1171ccc912de74bf9d328d29c143cdc65681d1ce7543cbd50f495a9a', 'ACTIVO'),
+(2, 2, 'operador1', 'scrypt:32768:8:1$4XN7GH2rwiTRolEe$f5d4f89cfaa23514d5794c5e56adc9aab7e5d1602e37fd8b592278be755295a873984d9b3ad78a64683d4c6a7f16d1f73689c141972b2ef27d63acea7327ee49', 'ACTIVO'),
+(3, 3, 'bombero_jorge', 'scrypt:32768:8:1$zZKDk0yzVJWcChdX$087ed82f99d12a89bfc0e91a0151e4efb613bcb10fff135d2e02c77f6007c5be0c25506b5121a59f76737bae84ca009612f39cc0b59467631998a974a6c7a0d5', 'ACTIVO'),
+(4, 3, 'bombero_mario', 'scrypt:32768:8:1$7F7gy14BWvBtIZ7K$c035df866308200d387acce830ed4ca80444379d800e634f685b13f704b63a565722189a72b178a597a79241f8d311e26071a090f907a8cacad5d8ad11c23674', 'ACTIVO'),
+(5, 4, 'ciudadano_ana', 'scrypt:32768:8:1$K62gs0o4kbkkZCT2$ed0725b19e08a6241f3221da5790da8bb1e81fe09eb1993d0a31d58077700af4fddad12e3deec89f533b280c74b0d765e40d649ec6ea385aa4ce628bfafb7385', 'ACTIVO')
 ON CONFLICT (nombre_usuario) DO NOTHING;
 
 -- 4. Zonas de Riesgo

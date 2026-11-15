@@ -3,8 +3,7 @@
 Proyecto académico para la gestión de incendios forestales. Backend **Flask + PostgreSQL**,
 frontend **React**, arquitectura **MVC** y desarrollo por iteraciones.
 
-> **Estado actual:** solo estructura de carpetas y configuración de conexión.
-> Todavía **no hay código**; se implementará iteración por iteración.
+> **Estado actual:** el sprint de usuarios está implementado (acceso, registro de ciudadano, sesión y administración de cuentas). Los demás módulos tienen sus tablas en la base y todavía no tienen pantallas. La guía corta para continuar está en `GUIA_GRUPOS.md`.
 
 ## Estructura
 
