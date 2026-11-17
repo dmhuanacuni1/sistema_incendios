@@ -2,6 +2,8 @@
 .env
 .env.local
 .env.*.local
+correo.env
+backend/correo.env
 
 # Python
 backend/venv/

@@ -33,11 +33,14 @@ CREATE TABLE personas (
     nombres VARCHAR(100) NOT NULL,
     apellidos VARCHAR(100) NOT NULL,
     telefono VARCHAR(20),
+    correo VARCHAR(255),
     direccion VARCHAR(255),
     tipo_persona VARCHAR(50) DEFAULT 'CIUDADANO' CHECK (tipo_persona IN ('ADMINISTRADOR', 'OPERADOR', 'CIUDADANO', 'BOMBERO')),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE UNIQUE INDEX idx_personas_correo ON personas (lower(correo));
 
 CREATE TABLE roles (
     id_rol SERIAL PRIMARY KEY,

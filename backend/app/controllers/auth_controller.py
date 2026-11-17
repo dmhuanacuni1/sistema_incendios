@@ -34,6 +34,20 @@ def me(usuario):
     return jsonify(auth_service.perfil(usuario))
 
 
+def recuperar():
+    try:
+        return jsonify(auth_service.pedir_recuperacion(_datos()))
+    except ErrorApp as exc:
+        return jsonify({"error": exc.mensaje}), exc.codigo
+
+
+def restablecer():
+    try:
+        return jsonify(auth_service.restablecer_contrasena(_datos()))
+    except ErrorApp as exc:
+        return jsonify({"error": exc.mensaje}), exc.codigo
+
+
 def contrasena(usuario):
     try:
         sesion = auth_service.cambiar_contrasena(usuario, _datos())

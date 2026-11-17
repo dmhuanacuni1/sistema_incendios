@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AppLayout from "../../components/layout/AppLayout";
-import Campo from "../../components/common/Campo";
+import CampoContrasena from "../../components/common/CampoContrasena";
 import { useAuth } from "../../hooks/useAuth";
 import { cambiarContrasena } from "../../services/authService";
 import { REGLA_CONTRASENA, contrasenaValida } from "../../utils/contrasena";
@@ -59,6 +59,7 @@ export default function CuentaPage() {
     ["Usuario", usuario.nombre_usuario],
     ["Rol", etiqueta(usuario.rol)],
     ["Estado", etiqueta(usuario.estado)],
+    ["Correo", persona.correo || "—"],
     ["Teléfono", persona.telefono || "—"],
     ["Dirección", persona.direccion || "—"],
   ];
@@ -93,19 +94,17 @@ export default function CuentaPage() {
           <h2>Cambiar contraseña</h2>
           {error && <p className="aviso">{error}</p>}
           {mensaje && <p className="ok">{mensaje}</p>}
-          <Campo
+          <CampoContrasena
             id="contrasena_actual"
             etiqueta="Contraseña actual"
-            type="password"
             autoComplete="current-password"
             value={actual}
             onChange={(event) => setActual(event.target.value)}
             required
           />
-          <Campo
+          <CampoContrasena
             id="contrasena_nueva"
             etiqueta="Contraseña nueva"
-            type="password"
             autoComplete="new-password"
             value={nueva}
             onChange={(event) => setNueva(event.target.value)}

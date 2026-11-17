@@ -8,6 +8,7 @@ class Persona(db.Model):
     nombres = db.Column(db.String(100), nullable=False)
     apellidos = db.Column(db.String(100), nullable=False)
     telefono = db.Column(db.String(20))
+    correo = db.Column(db.String(255))
     direccion = db.Column(db.String(255))
     tipo_persona = db.Column(db.String(50), default="CIUDADANO")
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())

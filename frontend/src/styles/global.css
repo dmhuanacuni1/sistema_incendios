@@ -908,3 +908,36 @@ p.cuenta.estado-pantalla {
     margin-top: 0.35rem;
   }
 }
+
+.clave {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.clave input,
+.tarjeta .clave input,
+.cuenta-tarjeta .clave input,
+.cuenta-tarjeta td .clave input {
+  width: 100%;
+  padding-right: 2.7rem;
+}
+
+.clave-ojo {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  transform: translateY(-50%);
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #6b6b74;
+  cursor: pointer;
+}
+
+.clave-ojo:hover { color: #161616; background: #f0f0f2; }

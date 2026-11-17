@@ -12,12 +12,12 @@ INSERT INTO roles (nombre_rol, descripcion) VALUES
 ON CONFLICT (nombre_rol) DO NOTHING;
 
 -- 2. Personas
-INSERT INTO personas (nombres, apellidos, telefono, direccion, tipo_persona) VALUES
-('Carlos', 'Mendoza Arce', '77123456', 'Av. Las Palmas #123, Central', 'ADMINISTRADOR'),
-('Lucía', 'Fernández Ramos', '77234567', 'Calle Murillo #450, Zona Norte', 'OPERADOR'),
-('Jorge', 'Salazar Gutiérrez', '77345678', 'Av. 6 de Agosto #789, Miraflores', 'BOMBERO'),
-('Mario', 'Vargas Peñaranda', '77456789', 'Calle Sucre #234, San Pedro', 'BOMBERO'),
-('Ana', 'Roca Beltrán', '77567890', 'Av. Ballivián #567, Calacoto', 'CIUDADANO');
+INSERT INTO personas (nombres, apellidos, telefono, correo, direccion, tipo_persona) VALUES
+('Carlos', 'Mendoza Arce', '77123456', 'admin@example.com', 'Av. Las Palmas #123, Central', 'ADMINISTRADOR'),
+('Lucía', 'Fernández Ramos', '77234567', 'operador1@example.com', 'Calle Murillo #450, Zona Norte', 'OPERADOR'),
+('Jorge', 'Salazar Gutiérrez', '77345678', 'jorge@example.com', 'Av. 6 de Agosto #789, Miraflores', 'BOMBERO'),
+('Mario', 'Vargas Peñaranda', '77456789', 'mario@example.com', 'Calle Sucre #234, San Pedro', 'BOMBERO'),
+('Ana', 'Roca Beltrán', '77567890', 'ana@example.com', 'Av. Ballivián #567, Calacoto', 'CIUDADANO');
 
 -- 3. Usuarios
 -- Hashes reales con werkzeug scrypt. Cuentas de prueba: admin/admin123, operador1/operador123, bombero_jorge y bombero_mario/bombero123, ciudadano_ana/ciudadano123

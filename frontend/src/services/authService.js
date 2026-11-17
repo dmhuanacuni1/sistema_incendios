@@ -8,6 +8,14 @@ export function registro(datos) {
   return api("/auth/registro", { method: "POST", body: datos, auth: false });
 }
 
+export function recuperar(correo) {
+  return api("/auth/recuperar", { method: "POST", body: { correo }, auth: false });
+}
+
+export function restablecer(datos) {
+  return api("/auth/restablecer", { method: "POST", body: datos, auth: false });
+}
+
 export function perfil() {
   return api("/auth/me");
 }

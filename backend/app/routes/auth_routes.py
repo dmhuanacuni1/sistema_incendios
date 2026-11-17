@@ -16,6 +16,16 @@ def login():
     return auth_controller.login()
 
 
+@auth_bp.post("/recuperar")
+def recuperar():
+    return auth_controller.recuperar()
+
+
+@auth_bp.post("/restablecer")
+def restablecer():
+    return auth_controller.restablecer()
+
+
 @auth_bp.post("/refresh")
 def refresh():
     return auth_controller.refresh()

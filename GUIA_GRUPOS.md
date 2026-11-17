@@ -57,3 +57,17 @@ Si quieren que al entrar ese rol caiga directo en su página, cambien los dos de
 - Una contraseña nueva pide al menos 8 caracteres, una mayúscula, un número y un carácter especial. Las contraseñas que ya existen siguen sirviendo para entrar.
 - El registro público solo crea ciudadanos. Las otras cuentas las crea un administrador.
 - No impriman ni suban `DATABASE_URL` ni `SECRET_KEY`.
+
+## Correo de recuperación
+
+La recuperación de contraseña lee `backend/correo.env`. Créenlo y peguen exactamente este contenido:
+
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=canchasrecuperar@gmail.com
+SMTP_PASSWORD=wwiy vadd ousl dmwd
+SMTP_FROM=canchasrecuperar@gmail.com
+SMTP_USE_TLS=true
+SMTP_USE_SSL=false
+```

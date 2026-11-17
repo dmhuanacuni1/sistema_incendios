@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AppLayout from "../../components/layout/AppLayout";
 import Campo from "../../components/common/Campo";
+import CampoContrasena from "../../components/common/CampoContrasena";
 import { guardarSesion } from "../../api/client";
 import { useAuth } from "../../hooks/useAuth";
 import * as usuariosService from "../../services/usuariosService";
@@ -27,6 +28,7 @@ function aBorrador(item) {
     nombre_usuario: item.nombre_usuario,
     nombres: item.persona.nombres,
     apellidos: item.persona.apellidos,
+    correo: item.persona.correo || "",
     rol: item.rol,
     estado: item.estado,
     contrasena: "",
@@ -43,6 +45,7 @@ const VACIO = {
   nombres: "",
   apellidos: "",
   telefono: "",
+  correo: "",
   direccion: "",
   nombre_usuario: "",
   contrasena: "",
@@ -181,6 +184,9 @@ export default function UsuariosPage() {
           </div>
           <div className="rejilla">
             <Campo id="alta-telefono" name="telefono" etiqueta="Teléfono" value={form.telefono} onChange={cambiar} />
+            <Campo id="alta-correo" name="correo" etiqueta="Correo" type="email" value={form.correo} onChange={cambiar} required />
+          </div>
+          <div className="rejilla">
             <Campo id="alta-direccion" name="direccion" etiqueta="Dirección" value={form.direccion} onChange={cambiar} />
           </div>
           <div className="rejilla">
@@ -192,11 +198,10 @@ export default function UsuariosPage() {
               onChange={cambiar}
               required
             />
-            <Campo
+            <CampoContrasena
               id="alta-contrasena"
               name="contrasena"
               etiqueta="Contraseña"
-              type="password"
               autoComplete="new-password"
               value={form.contrasena}
               onChange={cambiar}
@@ -261,6 +266,7 @@ export default function UsuariosPage() {
               <thead>
                 <tr>
                   <th>Usuario</th>
+                  <th>Correo</th>
                   <th>Nombre</th>
                   <th>Rol</th>
                   <th>Estado</th>
@@ -271,7 +277,7 @@ export default function UsuariosPage() {
               <tbody>
                 {visibles.length === 0 && (
                   <tr>
-                    <td className="tabla-vacia" colSpan={6}>Ninguna cuenta coincide con esos filtros.</td>
+                    <td className="tabla-vacia" colSpan={7}>Ninguna cuenta coincide con esos filtros.</td>
                   </tr>
                 )}
                 {visibles.map((item) => {
@@ -284,6 +290,15 @@ export default function UsuariosPage() {
                           aria-label={`Usuario de ${item.nombre_usuario}`}
                           value={borrador.nombre_usuario}
                           onChange={(event) => cambiarBorrador(item.id_usuario, "nombre_usuario", event.target.value)}
+                          required
+                        />
+                      </td>
+                      <td data-etiqueta="Correo">
+                        <input
+                          aria-label={`Correo de ${item.nombre_usuario}`}
+                          type="email"
+                          value={borrador.correo}
+                          onChange={(event) => cambiarBorrador(item.id_usuario, "correo", event.target.value)}
                           required
                         />
                       </td>
@@ -330,9 +345,9 @@ export default function UsuariosPage() {
                         </select>
                       </td>
                       <td data-etiqueta="Contraseña">
-                        <input
+                        <CampoContrasena
+                          id={`clave-${item.id_usuario}`}
                           aria-label={`Nueva contraseña de ${item.nombre_usuario}`}
-                          type="password"
                           autoComplete="new-password"
                           placeholder="Sin cambio"
                           value={borrador.contrasena}

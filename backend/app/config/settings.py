@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / "correo.env")
 
 
 def _uri_base_datos():
@@ -28,3 +29,5 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "").strip().strip('"')
     JWT_ACCESS_MINUTES = int(os.environ.get("JWT_ACCESS_MINUTES", "30"))
     JWT_REFRESH_DAYS = int(os.environ.get("JWT_REFRESH_DAYS", "7"))
+    JWT_RESET_MINUTES = int(os.environ.get("JWT_RESET_MINUTES", "60"))
+    FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://127.0.0.1:5173").strip().strip('"')

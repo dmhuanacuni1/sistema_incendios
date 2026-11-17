@@ -10,6 +10,7 @@ def usuario_a_dict(usuario):
             "nombres": persona.nombres,
             "apellidos": persona.apellidos,
             "telefono": persona.telefono,
+            "correo": persona.correo,
             "direccion": persona.direccion,
             "tipo_persona": persona.tipo_persona,
         },

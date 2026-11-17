@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Campo from "../../components/common/Campo";
+import CampoContrasena from "../../components/common/CampoContrasena";
 import { useAuth } from "../../hooks/useAuth";
 import { REGLA_CONTRASENA, contrasenaValida } from "../../utils/contrasena";
 
@@ -8,6 +9,7 @@ const VACIO = {
   nombres: "",
   apellidos: "",
   telefono: "",
+  correo: "",
   direccion: "",
   nombre_usuario: "",
   contrasena: "",
@@ -56,6 +58,7 @@ export default function RegistroPage() {
           <Campo id="apellidos" name="apellidos" etiqueta="Apellidos" value={form.apellidos} onChange={cambiar} required />
         </div>
         <Campo id="telefono" name="telefono" etiqueta="Teléfono" value={form.telefono} onChange={cambiar} />
+        <Campo id="correo" name="correo" etiqueta="Correo" type="email" value={form.correo} onChange={cambiar} required />
         <Campo id="direccion" name="direccion" etiqueta="Dirección" value={form.direccion} onChange={cambiar} />
         <Campo
           id="nombre_usuario"
@@ -66,22 +69,20 @@ export default function RegistroPage() {
           onChange={cambiar}
           required
         />
-        <Campo
+        <CampoContrasena
           id="contrasena"
           name="contrasena"
           etiqueta="Contraseña"
-          type="password"
           autoComplete="new-password"
           value={form.contrasena}
           onChange={cambiar}
           required
           minLength={8}
         />
-        <Campo
+        <CampoContrasena
           id="confirmar"
           name="confirmar"
           etiqueta="Confirmar contraseña"
-          type="password"
           autoComplete="new-password"
           value={form.confirmar}
           onChange={cambiar}

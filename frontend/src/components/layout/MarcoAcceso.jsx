@@ -21,6 +21,22 @@ function IconoUsuario() {
 export default function MarcoAcceso() {
   const { pathname } = useLocation();
   const esRegistro = pathname === "/registro";
+  const esRecuperar = pathname === "/recuperar";
+  const esRestablecer = pathname.startsWith("/restablecer");
+  const titulo = esRegistro
+    ? "Crear cuenta"
+    : esRecuperar
+      ? "Recuperar contraseña"
+      : esRestablecer
+        ? "Nueva contraseña"
+        : "Iniciar sesión";
+  const bajada = esRegistro
+    ? "El registro público crea una cuenta de ciudadano."
+    : esRecuperar
+      ? "Escribe el correo de tu cuenta. Si está registrado, te llega un enlace."
+      : esRestablecer
+        ? "Elige una contraseña nueva. El enlace vence en una hora."
+        : "Entra con tu usuario para reportar un aviso o continuar en el sistema.";
 
   return (
     <main className="lienzo">
@@ -43,15 +59,11 @@ export default function MarcoAcceso() {
             className={`bloque-form ${esRegistro ? "vista-registro" : "vista-login"}`}
           >
             <IconoUsuario />
-            <h1>{esRegistro ? "Crear cuenta" : "Iniciar sesión"}</h1>
-            <p className="bajada">
-              {esRegistro
-                ? "El registro público crea una cuenta de ciudadano."
-                : "Entra con tu usuario para reportar un aviso o continuar en el sistema."}
-            </p>
+            <h1>{titulo}</h1>
+            <p className="bajada">{bajada}</p>
             <Outlet />
             <p className="pie-acceso">
-              {esRegistro ? (
+              {esRegistro || esRecuperar || esRestablecer ? (
                 <>
                   ¿Ya tienes cuenta? <Link to="/login">Iniciar sesión</Link>
                 </>
