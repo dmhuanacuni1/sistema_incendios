@@ -271,6 +271,11 @@ export default function BrigadasPage() {
                           <span className="bg-cupo-barra">
                             <i style={{ width: `${Math.min(100, Math.round((brigada.total_miembros / brigada.max_integrantes) * 100))}%` }} />
                           </span>
+                          {!brigada.disponible && brigada.motivo_no_disponible && (
+                            <small className="bg-motivo-no-disponible">
+                              No se puede asignar: {brigada.motivo_no_disponible}
+                            </small>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -278,8 +283,14 @@ export default function BrigadasPage() {
                       <span className={`re-estado ${claseEstadoBrigada(brigada.estado)}`}>
                         <i className="vg-punto" /> {etiquetaEstadoBrigada(brigada.estado)}
                       </span>
-                      <span className={`re-badge-disponible${brigada.disponible ? "" : " bg-no-disponible"}`}>
+                      <span className={`re-badge-disponible${brigada.disponible ? "" : " bg-no-disponible"}`}
+                        title={brigada.motivo_no_disponible || "Disponible para asignación"}>
                         <i className="vg-punto" /> {brigada.disponible ? "Disponible" : "No disponible"}
+                      </span>
+                      <span className={`bg-cump${brigada.total_miembros >= brigada.min_integrantes ? "" : " bg-cump-incompleta"}`}>
+                        {brigada.total_miembros >= brigada.min_integrantes
+                          ? "Cuadrilla completa"
+                          : `Incompleta · faltan ${brigada.min_integrantes - brigada.total_miembros}`}
                       </span>
                     </div>
                   </div>

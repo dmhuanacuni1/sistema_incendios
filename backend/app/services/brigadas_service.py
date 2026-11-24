@@ -189,13 +189,36 @@ def _total_miembros(id_brigada):
     return BrigadaMiembro.query.filter_by(id_brigada=id_brigada, estado="ACTIVO").count()
 
 
+def _motivo_no_disponible(brigada, total):
+    if brigada.estado != "ACTIVA":
+        return f"Estado {brigada.estado}, no está activa"
+    if total < brigada.min_integrantes:
+        return (
+            f"Faltan {brigada.min_integrantes - total} integrantes "
+            f"(mínimo {brigada.min_integrantes})"
+        )
+    if _tiene_asignacion_activa(brigada.id_brigada):
+        return "Tiene una asignación de incidente abierta"
+    return None
+
+
+def _es_disponible(brigada, total):
+    return (
+        brigada.estado == "ACTIVA"
+        and total >= brigada.min_integrantes
+        and not _tiene_asignacion_activa(brigada.id_brigada)
+    )
+
+
 def _serializar(brigada, estacion=None):
+    total = _total_miembros(brigada.id_brigada)
+    disponible = _es_disponible(brigada, total)
     return brigada_a_dict(
         brigada,
         estacion=estacion,
-        total_miembros=_total_miembros(brigada.id_brigada),
-        disponible=brigada.estado == "ACTIVA"
-        and not _tiene_asignacion_activa(brigada.id_brigada),
+        total_miembros=total,
+        disponible=disponible,
+        motivo_no_disponible=None if disponible else _motivo_no_disponible(brigada, total),
     )
 
 
@@ -483,8 +506,7 @@ def mis_brigadas(usuario):
                 "rol_en_brigada": miembro.rol_en_brigada,
                 "fecha_incorporacion": _fecha(miembro.fecha_incorporacion),
                 "estado_brigada": brigada.estado,
-                "disponible": brigada.estado == "ACTIVA"
-                and not _tiene_asignacion_activa(brigada.id_brigada),
+                "disponible": _es_disponible(brigada, _total_miembros(brigada.id_brigada)),
             }
         )
     return resultado
@@ -761,6 +783,16 @@ def confirmar_recepcion(id_incidente, id_brigada, usuario):
         raise ErrorModulo(
             "Solo el jefe de cuadrilla de esta brigada puede confirmar la recepción",
             codigo=403,
+        )
+
+    brigada = db.session.get(Brigada, id_brigada)
+    total = _total_miembros(id_brigada)
+    if brigada is not None and total < brigada.min_integrantes:
+        raise ErrorModulo(
+            f"La brigada no cumple el mínimo de {brigada.min_integrantes} integrantes "
+            f"({total} activos); no se puede confirmar la recepción",
+            "integrantes",
+            409,
         )
 
     fila = db.session.execute(

@@ -1744,6 +1744,9 @@ a.vg-boton-secundario { text-decoration: none; }
 .bg-cupo-bajo { color: var(--vg-terracota); font-weight: 700; }
 .bg-cupo-barra { display: block; width: 160px; height: 5px; border-radius: 999px; background: var(--vg-input); overflow: hidden; }
 .bg-cupo-barra i { display: block; height: 100%; border-radius: 999px; background: var(--vg-fuego); }
+.bg-cump { align-self: flex-start; padding: 4px 10px; border-radius: 999px; background: var(--vg-brasa); color: var(--vg-ciruela-oscuro); font-size: 0.62rem; font-weight: 800; }
+.bg-cump-incompleta { background: #fbeceb; color: var(--vg-terracota); }
+.bg-motivo-no-disponible { display: block; margin-top: 3px; color: var(--vg-terracota); font-size: 0.62rem; font-weight: 700; }
 .bg-acciones { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 18px; }
 
 /* Modal de gestión de integrantes. */

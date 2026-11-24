@@ -5,7 +5,9 @@ def _fecha(valor):
     return valor.isoformat() if valor is not None else None
 
 
-def brigada_a_dict(brigada, estacion=None, total_miembros=0, disponible=False):
+def brigada_a_dict(
+    brigada, estacion=None, total_miembros=0, disponible=False, motivo_no_disponible=None
+):
     return {
         "id_brigada": brigada.id_brigada,
         "nombre": brigada.nombre,
@@ -17,6 +19,7 @@ def brigada_a_dict(brigada, estacion=None, total_miembros=0, disponible=False):
         "estacion": estacion.nombre if estacion is not None else None,
         "total_miembros": total_miembros,
         "disponible": bool(disponible),
+        "motivo_no_disponible": motivo_no_disponible,
         "created_at": _fecha(brigada.created_at),
         "updated_at": _fecha(brigada.updated_at),
     }

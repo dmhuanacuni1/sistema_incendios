@@ -151,7 +151,18 @@ export default function ConsultaBrigadasPage() {
                       </span>
                     </td>
                     <td data-etiqueta="Disponibilidad">
-                      {brigada.disponible ? "Disponible" : "No disponible"}
+                      {brigada.disponible ? (
+                        "Disponible"
+                      ) : (
+                        <>
+                          No disponible
+                          {brigada.motivo_no_disponible && (
+                            <small className="bg-motivo-no-disponible">
+                              {brigada.motivo_no_disponible}
+                            </small>
+                          )}
+                        </>
+                      )}
                     </td>
                     <td data-etiqueta="Integrantes">{brigada.total_miembros}</td>
                     <td data-etiqueta="Cupo">
