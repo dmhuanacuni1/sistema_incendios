@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { MainLayout } from '../../components/layout/MainLayout';
 import Icono from '../../components/layout/IconosVigia';
 import { estadoAsignacion } from '../../components/brigadas/estadosBrigada';
@@ -54,6 +54,7 @@ function reproducirTonoAlertaCad() {
 }
 
 export function IncidentesPage() {
+  const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const {
@@ -315,6 +316,35 @@ export function IncidentesPage() {
       setVistaActiva('detalle');
     }
   }, [searchParams, esCiudadano, setVistaActiva]);
+
+    // EFECTO PARA REDIRECCIÓN DESDE LA CAMPANITA (Protegido contra el polling)
+  const redireccionProcesada = useRef(false);
+
+  useEffect(() => {
+    // Si ya procesamos la redirección, no hacemos nada (evita que el polling nos devuelva a la vista)
+    if (redireccionProcesada.current) return;
+
+    if (location.state?.avisoSeleccionadoId) {
+      redireccionProcesada.current = true;
+      const idAviso = Number(location.state.avisoSeleccionadoId);
+      
+      setVistaActiva('avisos');
+      const avisoEncontrado = avisos.find((a) => a.id_aviso === idAviso);
+      
+      if (avisoEncontrado && (avisoEncontrado.estado_aviso === 'PENDIENTE' || avisoEncontrado.estado_aviso === 'VERIFICADO')) {
+        setObjetivoValidacion({ tipo: 'aviso', aviso: avisoEncontrado });
+      }
+      
+      // Limpiamos el estado correctamente usando navigate, para que React Router lo olvide
+      navigate(location.pathname, { replace: true, state: {} });
+    } 
+    else if (location.state?.incidenteSeleccionadoId) {
+      redireccionProcesada.current = true;
+      setSelectedId(Number(location.state.incidenteSeleccionadoId));
+      setVistaActiva('detalle');
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, avisos, navigate, setVistaActiva, location.pathname]);
 
   useEffect(() => {
     if (esCiudadano) {

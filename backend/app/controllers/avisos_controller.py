@@ -10,12 +10,21 @@ from app.utils.validators import require_non_empty_str
 from app.views.incidentes_view import serialize_aviso
 from app.views.response_view import success_response
 
+# IMPORTACIONES NUEVAS
+from app.services.alertas_service import AlertasService
+from app.services.incidente_service import IncidenteService
+
 
 class AvisosController:
     """Orquesta las peticiones HTTP del recurso /api/avisos."""
 
-    def __init__(self, service: AvisoService | None = None) -> None:
+    def __init__(
+        self, 
+        service: AvisoService | None = None,
+        alertas_service: AlertasService | None = None
+    ) -> None:
         self._service = service or AvisoService()
+        self._alertas = alertas_service or AlertasService()
 
     def listar(self):
         estado = request.args.get("estado_aviso")
@@ -66,6 +75,14 @@ class AvisosController:
                 payload["id_ciudadano"] = usuario.id_persona
 
         aviso = self._service.crear_aviso(payload)
+        
+        # INTEGRACIÓN CON ALERTAS
+        try:
+            self._alertas.notificar_aviso_ciudadano(aviso)
+            self._alertas.notificar_aviso_operadores(aviso)
+        except Exception as e:
+            print(f"Error en alertas al crear aviso: {e}")
+
         return success_response(
             data=serialize_aviso(aviso),
             message="Aviso de incendio registrado",
@@ -77,6 +94,17 @@ class AvisosController:
         nuevo_estado = require_non_empty_str(payload, "estado_aviso")
         motivo = payload.get("motivo")
         aviso = self._service.cambiar_estado(id_aviso, nuevo_estado, motivo=motivo)
+        
+        # INTEGRACIÓN CON ALERTAS
+        try:
+            if nuevo_estado == "VERIFICADO":
+                self._alertas.notificar_aviso_verificado(aviso)
+            elif nuevo_estado == "DESCARTADO":
+                # NUEVO: Notificar al ciudadano que su aviso fue descartado
+                self._alertas.notificar_aviso_descartado(aviso, motivo)
+        except Exception as e:
+            print(f"Error en alertas al cambiar estado de aviso: {e}")
+        
         return success_response(
             data=serialize_aviso(aviso),
             message="Estado del aviso actualizado",
@@ -154,7 +182,18 @@ class AvisosController:
         usuario = getattr(g, "usuario", None)
         if usuario is not None and payload.get("id_operador") is None:
             payload["id_operador"] = usuario.id_persona
+            
         resultado = self._service.consolidar_grupo_en_incidente(payload)
+        
+        # INTEGRACIÓN CON ALERTAS
+        try:
+            id_incidente = resultado["incidente"]["id_incidente"]
+            inc_svc = IncidenteService()
+            incidente_db = inc_svc.obtener_incidente(id_incidente)
+            self._alertas.generar_alerta_nuevo_incidente(incidente_db)
+        except Exception as e:
+            print(f"Error en alertas al consolidar grupo: {e}")
+
         return success_response(
             data=resultado,
             message="Grupo de alarmas consolidado en un único incidente",

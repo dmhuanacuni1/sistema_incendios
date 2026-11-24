@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Icono from "./IconosVigia";
 import { useVigia } from "../../context/VigiaContext";
+import NotificationBell from "./NotificationBell";
 
 const TITULOS = [
   ["/dashboard", "Panel principal"],
@@ -50,6 +51,7 @@ export default function VigiaHeader({ pathname, usuario }) {
       </div>
 
       <div className="vg-header-derecha">
+        <NotificationBell />
         {enRecursos && (
           <label className="vg-buscar">
             <Icono nombre="buscar" tamano={18} />

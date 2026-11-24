@@ -44,6 +44,8 @@ def create_app(config_overrides=None):
     from app.routes.avisos_routes import avisos_bp
     from app.routes.health_routes import health_bp
     from app.routes.incidentes_routes import incidentes_bp
+    from app.routes.alertas_routes import alertas_bp
+
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(usuarios_bp, url_prefix="/api/usuarios")
@@ -56,6 +58,7 @@ def create_app(config_overrides=None):
     app.register_blueprint(health_bp)
     app.register_blueprint(avisos_bp)
     app.register_blueprint(incidentes_bp)
+    app.register_blueprint(alertas_bp, url_prefix="/api/alertas")
 
     @app.get("/api/salud")
     def salud():
