@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Icono from "./IconosVigia";
+import CampanaNotificaciones from "../brigadas/CampanaNotificaciones";
 import { useVigia } from "../../context/VigiaContext";
 
 const TITULOS = [
@@ -47,6 +48,8 @@ export default function VigiaHeader({ pathname, usuario }) {
       </div>
 
       <div className="vg-header-derecha">
+        {usuario?.rol === "BOMBERO" && <CampanaNotificaciones />}
+
         {enRecursos && (
           <label className="vg-buscar">
             <Icono nombre="buscar" tamano={18} />

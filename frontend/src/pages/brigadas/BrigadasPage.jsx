@@ -4,7 +4,6 @@ import ModalCambioEstadoBrigada from "../../components/brigadas/ModalCambioEstad
 import ModalGestionBrigada from "../../components/brigadas/ModalGestionBrigada";
 import {
   claseEstadoBrigada,
-  estadoNotificacion,
   etiquetaEstadoBrigada,
   etiquetaRolBrigada,
 } from "../../components/brigadas/estadosBrigada";
@@ -20,11 +19,6 @@ export default function BrigadasPage() {
   const esGestor = esAdmin || usuario?.rol === "OPERADOR";
   const esBombero = usuario?.rol === "BOMBERO";
 
-  const [notificaciones, setNotificaciones] = useState([]);
-  const [cargandoNotif, setCargandoNotif] = useState(false);
-  const [respondiendo, setRespondiendo] = useState(null);
-  const [rechazando, setRechazando] = useState(null);
-  const [motivos, setMotivos] = useState({});
   const [misBrigadas, setMisBrigadas] = useState([]);
   const [cargandoMis, setCargandoMis] = useState(false);
   const [brigadas, setBrigadas] = useState([]);
@@ -56,19 +50,12 @@ export default function BrigadasPage() {
   const cargarDatosBombero = useCallback(async () => {
     if (!esBombero) return;
     setCargandoMis(true);
-    setCargandoNotif(true);
     try {
-      const [mis, notifs] = await Promise.all([
-        brigadasService.misBrigadas(),
-        brigadasService.misNotificaciones(),
-      ]);
-      setMisBrigadas(mis);
-      setNotificaciones(notifs);
+      setMisBrigadas(await brigadasService.misBrigadas());
     } catch (err) {
       setError(err.message);
     } finally {
       setCargandoMis(false);
-      setCargandoNotif(false);
     }
   }, [esBombero]);
 
@@ -76,26 +63,16 @@ export default function BrigadasPage() {
     cargarDatosBombero();
   }, [cargarDatosBombero]);
 
-  async function responder(notificacion, respuesta) {
-    setError("");
-    setMensaje("");
-    setRespondiendo(notificacion.id_notificacion);
-    try {
-      const resultado = await brigadasService.responderNotificacion(
-        notificacion.id_notificacion,
-        respuesta,
-        motivos[notificacion.id_notificacion] || ""
-      );
-      setMensaje(resultado.mensaje);
-      setRechazando(null);
-      await cargarDatosBombero();
-      await cargar();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setRespondiendo(null);
+  useEffect(() => {
+    function alResponder() {
+      cargarDatosBombero();
+      cargar();
     }
-  }
+    window.addEventListener("brigadas:notificacion-respondida", alResponder);
+    return () => {
+      window.removeEventListener("brigadas:notificacion-respondida", alResponder);
+    };
+  }, [cargarDatosBombero, cargar]);
 
   const filtradas = useMemo(() => {
     const texto = busqueda.trim().toLowerCase();
@@ -158,99 +135,6 @@ export default function BrigadasPage() {
             Consulta detallada <Icono nombre="chevronDerecha" tamano={15} />
           </Link>
         </div>
-
-        {esBombero && (
-          <section className="bg-notificaciones">
-            <div className="bg-mis-cabecera">
-              <span className="re-card-icono"><Icono nombre="alerta" tamano={22} /></span>
-              <div>
-                <span className="re-etiqueta">Bandeja de entrada</span>
-                <h2>Mis notificaciones</h2>
-                <p>Acepta o rechaza las invitaciones a brigadas. Si rechazas, indica el motivo.</p>
-              </div>
-            </div>
-            {cargandoNotif ? (
-              <p className="estado">Cargando notificaciones.</p>
-            ) : notificaciones.length === 0 ? (
-              <p className="re-vacio-seccion">No tienes notificaciones por ahora.</p>
-            ) : (
-              <ul className="bg-listado">
-                {notificaciones.map((notificacion) => {
-                  const estado = estadoNotificacion(notificacion.estado);
-                  return (
-                    <li className="bg-fila bg-notif" key={notificacion.id_notificacion}>
-                      <span className="bg-fila-icono"><Icono nombre="alerta" tamano={18} /></span>
-                      <span className="re-unidad-datos">
-                        <strong>{notificacion.mensaje}</strong>
-                        <small>
-                          {notificacion.brigada || "-"}
-                          {" · "}{notificacion.fecha_creacion?.slice(0, 10)}
-                          {" · "}{estado.etiqueta}
-                          {notificacion.motivo_rechazo
-                            ? ` · Motivo: ${notificacion.motivo_rechazo}`
-                            : ""}
-                        </small>
-                      </span>
-                      {notificacion.estado === "PENDIENTE" && (
-                        <div className="bg-notif-acciones">
-                          <button
-                            type="button"
-                            className="vg-boton-principal"
-                            disabled={respondiendo === notificacion.id_notificacion}
-                            onClick={() => responder(notificacion, "ACEPTAR")}
-                          >
-                            Aceptar
-                          </button>
-                          <button
-                            type="button"
-                            className="vg-boton-secundario"
-                            disabled={respondiendo === notificacion.id_notificacion}
-                            onClick={() => setRechazando(notificacion.id_notificacion)}
-                          >
-                            Rechazar
-                          </button>
-                        </div>
-                      )}
-                      {rechazando === notificacion.id_notificacion && (
-                        <div className="bg-notif-rechazo">
-                          <label className="campo" htmlFor={`motivo-${notificacion.id_notificacion}`}>
-                            <span>Motivo del rechazo (obligatorio)</span>
-                            <textarea
-                              id={`motivo-${notificacion.id_notificacion}`}
-                              value={motivos[notificacion.id_notificacion] || ""}
-                              onChange={(evento) =>
-                                setMotivos((actual) => ({
-                                  ...actual,
-                                  [notificacion.id_notificacion]: evento.target.value,
-                                }))
-                              }
-                              maxLength={500}
-                              rows={2}
-                              placeholder="Ej. Ya estoy asignado a otra brigada y no tengo tiempo disponible"
-                            />
-                          </label>
-                          <div className="acciones-form">
-                            <button
-                              type="button"
-                              className="boton boton-oscuro"
-                              disabled={respondiendo === notificacion.id_notificacion}
-                              onClick={() => responder(notificacion, "RECHAZAR")}
-                            >
-                              Enviar rechazo
-                            </button>
-                            <button type="button" className="boton" onClick={() => setRechazando(null)}>
-                              Cancelar
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
-        )}
 
         {esBombero && (
           <section className="bg-mis-brigadas">
@@ -377,6 +261,17 @@ export default function BrigadasPage() {
                           <Icono nombre="usuario" tamano={14} /> {brigada.total_miembros} integrante{brigada.total_miembros === 1 ? "" : "s"}
                         </p>
                         {brigada.motivo_estado && <p className="bg-motivo">Motivo: {brigada.motivo_estado}</p>}
+                        <div className={`bg-cupo${brigada.total_miembros < brigada.min_integrantes ? " bg-cupo-bajo" : ""}`}>
+                          <span>
+                            Cupo {brigada.total_miembros}/{brigada.max_integrantes}
+                            {" · mín. "}{brigada.min_integrantes}
+                            {brigada.total_miembros < brigada.min_integrantes ? " · Por debajo del mínimo" : ""}
+                            {brigada.total_miembros >= brigada.max_integrantes ? " · Completa" : ""}
+                          </span>
+                          <span className="bg-cupo-barra">
+                            <i style={{ width: `${Math.min(100, Math.round((brigada.total_miembros / brigada.max_integrantes) * 100))}%` }} />
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div className="re-card-lado">

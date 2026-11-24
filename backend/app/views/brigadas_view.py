@@ -11,6 +11,8 @@ def brigada_a_dict(brigada, estacion=None, total_miembros=0, disponible=False):
         "nombre": brigada.nombre,
         "estado": brigada.estado,
         "motivo_estado": brigada.motivo_estado,
+        "min_integrantes": brigada.min_integrantes,
+        "max_integrantes": brigada.max_integrantes,
         "id_estacion": brigada.id_estacion,
         "estacion": estacion.nombre if estacion is not None else None,
         "total_miembros": total_miembros,

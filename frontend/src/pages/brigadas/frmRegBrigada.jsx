@@ -6,7 +6,14 @@ import AppLayout from "../../components/layout/AppLayout";
 import * as estacionesService from "../../services/estacionesService";
 import * as brigadasService from "../../services/brigadasService";
 
-const VACIO = { nombre: "", id_estacion: "", estado: "ACTIVA", motivo: "" };
+const VACIO = {
+  nombre: "",
+  id_estacion: "",
+  estado: "ACTIVA",
+  motivo: "",
+  min_integrantes: "2",
+  max_integrantes: "8",
+};
 const OPCIONES_ALTA = ESTADOS_BRIGADA.filter(([codigo]) => codigo !== "DISUELTA");
 
 export default function FrmRegBrigada() {
@@ -54,6 +61,8 @@ export default function FrmRegBrigada() {
         id_estacion: Number(form.id_estacion),
         estado: form.estado,
         motivo: form.motivo,
+        min_integrantes: Number(form.min_integrantes),
+        max_integrantes: Number(form.max_integrantes),
       });
       setMensaje(`${respuesta.mensaje} · ${respuesta.brigada.nombre}`);
       setForm({ ...VACIO, id_estacion: String(estaciones[0]?.id_estacion || "") });
@@ -116,6 +125,33 @@ export default function FrmRegBrigada() {
                 ))}
               </select>
             </label>
+
+            <div className="rejilla">
+              <Campo
+                id="bg-min"
+                name="min_integrantes"
+                etiqueta="Mínimo de integrantes"
+                type="number"
+                min="1"
+                max="50"
+                step="1"
+                value={form.min_integrantes}
+                onChange={cambiar}
+                required
+              />
+              <Campo
+                id="bg-max"
+                name="max_integrantes"
+                etiqueta="Máximo de integrantes"
+                type="number"
+                min="1"
+                max="50"
+                step="1"
+                value={form.max_integrantes}
+                onChange={cambiar}
+                required
+              />
+            </div>
 
             {requiereMotivo(form.estado) && (
               <label className="campo" htmlFor="bg-motivo">

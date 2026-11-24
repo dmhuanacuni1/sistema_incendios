@@ -9,7 +9,12 @@ export default function FrmEditarBrigada() {
   const { idBrigada } = useParams();
   const navigate = useNavigate();
   const [estaciones, setEstaciones] = useState([]);
-  const [form, setForm] = useState({ nombre: "", id_estacion: "" });
+  const [form, setForm] = useState({
+    nombre: "",
+    id_estacion: "",
+    min_integrantes: "2",
+    max_integrantes: "8",
+  });
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
@@ -22,6 +27,8 @@ export default function FrmEditarBrigada() {
         setForm({
           nombre: brigada.nombre,
           id_estacion: String(brigada.id_estacion),
+          min_integrantes: String(brigada.min_integrantes ?? 2),
+          max_integrantes: String(brigada.max_integrantes ?? 8),
         });
         setEstaciones(lista);
       })
@@ -48,6 +55,8 @@ export default function FrmEditarBrigada() {
       await brigadasService.editar(idBrigada, {
         nombre: form.nombre,
         id_estacion: Number(form.id_estacion),
+        min_integrantes: Number(form.min_integrantes),
+        max_integrantes: Number(form.max_integrantes),
       });
       navigate("/brigadas", { state: { mensaje: "Brigada actualizada correctamente" } });
     } catch (err) {
@@ -89,6 +98,33 @@ export default function FrmEditarBrigada() {
                 ))}
               </select>
             </label>
+            <div className="rejilla">
+              <Campo
+                id="bg-edit-min"
+                name="min_integrantes"
+                etiqueta="Mínimo de integrantes"
+                type="number"
+                min="1"
+                max="50"
+                step="1"
+                value={form.min_integrantes}
+                onChange={cambiar}
+                required
+              />
+              <Campo
+                id="bg-edit-max"
+                name="max_integrantes"
+                etiqueta="Máximo de integrantes"
+                type="number"
+                min="1"
+                max="50"
+                step="1"
+                value={form.max_integrantes}
+                onChange={cambiar}
+                required
+              />
+            </div>
+
             <div className="acciones-form">
               <button className="boton boton-oscuro" type="submit" disabled={guardando}>
                 {guardando ? "Guardando." : "Guardar cambios"}

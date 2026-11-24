@@ -135,6 +135,7 @@ export default function ConsultaBrigadasPage() {
                   <th>Estado</th>
                   <th>Disponibilidad</th>
                   <th>Integrantes</th>
+                  <th>Cupo (mín./máx.)</th>
                   <th>Motivo</th>
                   <th />
                 </tr>
@@ -153,6 +154,9 @@ export default function ConsultaBrigadasPage() {
                       {brigada.disponible ? "Disponible" : "No disponible"}
                     </td>
                     <td data-etiqueta="Integrantes">{brigada.total_miembros}</td>
+                    <td data-etiqueta="Cupo">
+                      {brigada.min_integrantes} / {brigada.max_integrantes}
+                    </td>
                     <td data-etiqueta="Motivo">{brigada.motivo_estado || "-"}</td>
                     <td>
                       <div className="bg-tabla-acciones">

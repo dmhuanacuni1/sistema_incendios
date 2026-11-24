@@ -98,6 +98,7 @@ export default function ModalGestionBrigada({ brigada, esGestor, onCerrar, onCam
               {" · "}
               {activos.length} integrante{activos.length === 1 ? "" : "s"} activo
               {activos.length === 1 ? "" : "s"}
+              {" · cupo "}{brigada.total_miembros}{"/"}{brigada.max_integrantes}
             </p>
           </div>
         </div>

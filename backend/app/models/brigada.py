@@ -15,6 +15,8 @@ class Brigada(db.Model):
     nombre = db.Column(db.String(100), nullable=False)
     estado = db.Column(db.String(30), nullable=False, default="ACTIVA")
     motivo_estado = db.Column(db.Text)
+    min_integrantes = db.Column(db.Integer, nullable=False, default=2)
+    max_integrantes = db.Column(db.Integer, nullable=False, default=8)
     id_estacion = db.Column(
         db.Integer,
         db.ForeignKey("estaciones.id_estacion", ondelete="RESTRICT"),

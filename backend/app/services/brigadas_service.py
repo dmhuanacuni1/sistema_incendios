@@ -111,6 +111,46 @@ def _motivo(data, estado, estado_anterior=None):
     return valor or None
 
 
+def _cupo(data, ocupados_actuales=0):
+    """Valida min_integrantes / max_integrantes de una brigada."""
+    def numero(campo, etiqueta, defecto):
+        valor = data.get(campo, defecto)
+        if valor is None or (isinstance(valor, str) and not valor.strip()):
+            return defecto
+        if isinstance(valor, bool):
+            raise ErrorModulo(f"{etiqueta}: debe ser un número entero", campo)
+        try:
+            return int(valor)
+        except (TypeError, ValueError):
+            raise ErrorModulo(f"{etiqueta}: debe ser un número entero", campo)
+
+    minimo = numero("min_integrantes", "Mínimo de integrantes", 2)
+    maximo = numero("max_integrantes", "Máximo de integrantes", 8)
+    if minimo < 1:
+        raise ErrorModulo("Mínimo: debe ser al menos 1", "min_integrantes")
+    if minimo > 50 or maximo > 50:
+        raise ErrorModulo("Cupo: el límite es 50 integrantes", "max_integrantes")
+    if maximo < minimo:
+        raise ErrorModulo("Máximo: debe ser mayor o igual al mínimo", "max_integrantes")
+    if maximo < ocupados_actuales:
+        raise ErrorModulo(
+            f"Máximo: no puede ser menor a los {ocupados_actuales} integrantes actuales",
+            "max_integrantes",
+        )
+    return minimo, maximo
+
+
+def _cupo_ocupado(id_brigada):
+    total = db.session.execute(
+        text(
+            "select count(*) from brigada_miembros "
+            "where id_brigada = :id and estado in ('ACTIVO', 'PENDIENTE')"
+        ),
+        {"id": id_brigada},
+    ).scalar_one()
+    return total
+
+
 def _brigada_desde(id_brigada):
     brigada = db.session.get(Brigada, id_brigada)
     if brigada is None:
@@ -240,6 +280,7 @@ def crear_brigada(data, usuario):
     estacion = _estacion_desde(data)
     estado = normalizar_estado(data.get("estado") or "ACTIVA")
     motivo = _motivo(data, estado)
+    minimo, maximo = _cupo(data)
 
     repetida = (
         Brigada.query.filter(db.func.lower(Brigada.nombre) == nombre.lower()).first()
@@ -251,6 +292,8 @@ def crear_brigada(data, usuario):
         nombre=nombre,
         estado=estado,
         motivo_estado=motivo,
+        min_integrantes=minimo,
+        max_integrantes=maximo,
         id_estacion=estacion.id_estacion,
     )
     db.session.add(brigada)
@@ -269,6 +312,7 @@ def editar_brigada(id_brigada, data, usuario):
     brigada = _brigada_desde(id_brigada)
     nombre = texto(data, "nombre", "Nombre", 100)
     estacion = _estacion_desde(data)
+    minimo, maximo = _cupo(data, _cupo_ocupado(id_brigada))
 
     repetida = (
         Brigada.query.filter(db.func.lower(Brigada.nombre) == nombre.lower())
@@ -280,6 +324,8 @@ def editar_brigada(id_brigada, data, usuario):
 
     brigada.nombre = nombre
     brigada.id_estacion = estacion.id_estacion
+    brigada.min_integrantes = minimo
+    brigada.max_integrantes = maximo
     brigada.updated_at = db.func.now()
     try:
         db.session.commit()
@@ -568,6 +614,13 @@ def asignar_miembros(id_brigada, data, usuario):
             db.session.add(integrante)
         invitaciones.append((integrante, candidato, rol))
         ocupados[id_persona] = id_brigada
+
+    if _cupo_ocupado(id_brigada) + len(invitaciones) > brigada.max_integrantes:
+        raise ErrorModulo(
+            f"Cupo: {brigada.nombre} admite como máximo "
+            f"{brigada.max_integrantes} integrantes",
+            "miembros",
+        )
 
     etiqueta_rol = {
         "JEFE_CUADRILLA": "Jefe de cuadrilla",
