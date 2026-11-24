@@ -19,8 +19,6 @@ import IncendiosAsignadosPage from "../pages/brigadas/IncendiosAsignadosPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import ZonasRiesgoPage from "../pages/zonas/ZonasRiesgoPage";
 import { IncidentesPage } from "../pages/incidentes/IncidentesPage";
-import HistorialAlertasPage from "../pages/alertas/HistorialAlertasPage";
-import MisAlertasPage from "../pages/alertas/MisAlertasPage";
 
 function PantallaCarga() {
   return <p className="cuenta estado-pantalla">Comprobando sesión…</p>;
@@ -85,24 +83,6 @@ export default function AppRoutes() {
 
       {/* Iteración 4: Gestión de Zonas de Riesgo. */}
       <Route path="/zonas-riesgo" element={<RutaPrivada roles={[...ROLES_OPERATIVOS, "CIUDADANO"]}><ZonasRiesgoPage /></RutaPrivada>} />
-
-      {/* Iteración 6: Gestión de Alertas y Notificaciones. */}
-      <Route 
-        path="/alertas" 
-        element={
-          <RutaPrivada roles={["ADMINISTRADOR", "OPERADOR"]}>
-            <HistorialAlertasPage />
-          </RutaPrivada>
-        } 
-      />
-      <Route 
-        path="/mis-alertas" 
-        element={
-          <RutaPrivada roles={["CIUDADANO"]}>
-            <MisAlertasPage />
-          </RutaPrivada>
-        } 
-      />
 
       <Route path="/usuarios" element={<RutaPrivada soloAdmin><UsuariosPage /></RutaPrivada>} />
       <Route path="/incidentes" element={<IncidentesPage />} />

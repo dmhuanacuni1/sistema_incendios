@@ -21,8 +21,6 @@ from app.views.incidentes_view import (
 )
 from app.views.response_view import success_response
 
-# IMPORTACIÓN DEL NUEVO SERVICIO
-from app.services.alertas_service import AlertasService
 
 class IncidentesController:
     """Orquesta las peticiones HTTP del recurso /api/incidentes."""
@@ -35,7 +33,6 @@ class IncidentesController:
         evaluacion_service: EvaluacionDanoService | None = None,
         referencias_service: ReferenciaValidatorProtocol | None = None,
         firms_service: FirmsService | None = None,
-        alertas_service: AlertasService | None = None,  # <-- INYECCIÓN
     ) -> None:
         self._incidentes = incidente_service or IncidenteService()
         self._despacho = despacho_service or DespachoBrigadaService()
@@ -43,7 +40,6 @@ class IncidentesController:
         self._evaluaciones = evaluacion_service or EvaluacionDanoService()
         self._referencias = referencias_service or SQLAlchemyReferenciaValidator()
         self._firms = firms_service or FirmsService()
-        self._alertas = alertas_service or AlertasService()  # <-- INSTANCIA
 
     def listar(self):
         estado = request.args.get("estado")
@@ -77,15 +73,7 @@ class IncidentesController:
         usuario = getattr(g, "usuario", None)
         if usuario is not None and payload.get("id_operador") is None:
             payload["id_operador"] = usuario.id_persona
-            
         incidente = self._incidentes.crear_incidente(payload)
-
-        try:
-            self._alertas.generar_alerta_nuevo_incidente(incidente)
-            self._alertas.notificar_registro_ciudadano(incidente)
-        except Exception as e:
-            print(f"Error en alertas al crear incidente: {e}")
-        
         return success_response(
             data=serialize_incidente(incidente),
             message="Incidente creado",
@@ -96,12 +84,6 @@ class IncidentesController:
         payload = request.get_json(silent=True) or {}
         nuevo_estado = require_non_empty_str(payload, "estado")
         incidente = self._incidentes.cambiar_estado(id_incidente, nuevo_estado)
-        
-        try:
-            self._alertas.notificar_cambio_estado(incidente)
-        except Exception as e:
-            print(f"Error en alertas al cambiar estado: {e}")
-        
         return success_response(
             data=serialize_incidente(incidente),
             message="Estado del incidente actualizado",
@@ -117,10 +99,6 @@ class IncidentesController:
 
     def cerrar(self, id_incidente: int):
         incidente = self._incidentes.cambiar_estado(id_incidente, "CERRADO")
-        
-        # INTEGRACIÓN: Al cerrar, también notificamos
-        self._alertas.notificar_cambio_estado(incidente)
-        
         return success_response(
             data=serialize_incidente(incidente),
             message="Incidente cerrado correctamente",
@@ -187,15 +165,6 @@ class IncidentesController:
     def asignar_brigada(self, id_incidente: int):
         payload = request.get_json(silent=True) or {}
         asignacion = self._despacho.asignar_brigada(id_incidente, payload)
-        
-        try:
-            self._alertas.notificar_asignacion_brigada(
-                id_incidente=id_incidente, 
-                id_brigada=asignacion.id_brigada
-            )
-        except Exception as e:
-            print(f"Error en alertas al asignar brigada: {e}")
-        
         return success_response(
             data=serialize_incidente_brigada(asignacion),
             message="Brigada asignada al incidente",
