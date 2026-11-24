@@ -124,12 +124,15 @@ def _cupo(data, ocupados_actuales=0):
         except (TypeError, ValueError):
             raise ErrorModulo(f"{etiqueta}: debe ser un número entero", campo)
 
-    minimo = numero("min_integrantes", "Mínimo de integrantes", 2)
-    maximo = numero("max_integrantes", "Máximo de integrantes", 8)
-    if minimo < 1:
-        raise ErrorModulo("Mínimo: debe ser al menos 1", "min_integrantes")
-    if minimo > 50 or maximo > 50:
-        raise ErrorModulo("Cupo: el límite es 50 integrantes", "max_integrantes")
+    minimo = numero("min_integrantes", "Mínimo de integrantes", 5)
+    maximo = numero("max_integrantes", "Máximo de integrantes", 10)
+    if minimo < 5:
+        raise ErrorModulo(
+            "Mínimo: una cuadrilla operativa necesita al menos 5 integrantes",
+            "min_integrantes",
+        )
+    if maximo > 10:
+        raise ErrorModulo("Máximo: una cuadrilla admite hasta 10 integrantes", "max_integrantes")
     if maximo < minimo:
         raise ErrorModulo("Máximo: debe ser mayor o igual al mínimo", "max_integrantes")
     if maximo < ocupados_actuales:

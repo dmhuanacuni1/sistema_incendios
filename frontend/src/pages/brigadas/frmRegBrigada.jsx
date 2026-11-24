@@ -11,8 +11,8 @@ const VACIO = {
   id_estacion: "",
   estado: "ACTIVA",
   motivo: "",
-  min_integrantes: "2",
-  max_integrantes: "8",
+  min_integrantes: "5",
+  max_integrantes: "10",
 };
 const OPCIONES_ALTA = ESTADOS_BRIGADA.filter(([codigo]) => codigo !== "DISUELTA");
 
@@ -132,8 +132,8 @@ export default function FrmRegBrigada() {
                 name="min_integrantes"
                 etiqueta="Mínimo de integrantes"
                 type="number"
-                min="1"
-                max="50"
+                min="5"
+                max="10"
                 step="1"
                 value={form.min_integrantes}
                 onChange={cambiar}
@@ -144,8 +144,8 @@ export default function FrmRegBrigada() {
                 name="max_integrantes"
                 etiqueta="Máximo de integrantes"
                 type="number"
-                min="1"
-                max="50"
+                min="5"
+                max="10"
                 step="1"
                 value={form.max_integrantes}
                 onChange={cambiar}

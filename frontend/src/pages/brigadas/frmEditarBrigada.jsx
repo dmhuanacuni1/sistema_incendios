@@ -12,8 +12,8 @@ export default function FrmEditarBrigada() {
   const [form, setForm] = useState({
     nombre: "",
     id_estacion: "",
-    min_integrantes: "2",
-    max_integrantes: "8",
+    min_integrantes: "5",
+    max_integrantes: "10",
   });
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
@@ -27,8 +27,8 @@ export default function FrmEditarBrigada() {
         setForm({
           nombre: brigada.nombre,
           id_estacion: String(brigada.id_estacion),
-          min_integrantes: String(brigada.min_integrantes ?? 2),
-          max_integrantes: String(brigada.max_integrantes ?? 8),
+          min_integrantes: String(brigada.min_integrantes ?? 5),
+          max_integrantes: String(brigada.max_integrantes ?? 10),
         });
         setEstaciones(lista);
       })
@@ -104,8 +104,8 @@ export default function FrmEditarBrigada() {
                 name="min_integrantes"
                 etiqueta="Mínimo de integrantes"
                 type="number"
-                min="1"
-                max="50"
+                min="5"
+                max="10"
                 step="1"
                 value={form.min_integrantes}
                 onChange={cambiar}
@@ -116,8 +116,8 @@ export default function FrmEditarBrigada() {
                 name="max_integrantes"
                 etiqueta="Máximo de integrantes"
                 type="number"
-                min="1"
-                max="50"
+                min="5"
+                max="10"
                 step="1"
                 value={form.max_integrantes}
                 onChange={cambiar}

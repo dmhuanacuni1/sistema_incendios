@@ -1,5 +1,6 @@
 -- Iteración 3: cupo mínimo y máximo de integrantes por brigada.
--- Aditiva e idempotente. Las brigadas existentes reciben 2 y 8 por defecto.
+-- Aditiva e idempotente. Los valores iniciales se refinan en la migración 006
+-- (mínimo estricto 5, máximo 10).
 
 ALTER TABLE brigadas
     ADD COLUMN IF NOT EXISTS min_integrantes SMALLINT NOT NULL DEFAULT 2,
