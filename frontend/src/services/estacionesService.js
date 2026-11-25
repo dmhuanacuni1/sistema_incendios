@@ -12,6 +12,17 @@ export function crear(datos) {
   return api("/estaciones", { method: "POST", body: datos });
 }
 
+export function actualizar(idEstacion, datos) {
+  return api(`/estaciones/${idEstacion}`, { method: "PATCH", body: datos });
+}
+
+export function cambiarEstadoEstacion(idEstacion, estado, motivoBaja = "") {
+  return api(`/estaciones/${idEstacion}`, {
+    method: "PATCH",
+    body: { estado, motivo_baja: motivoBaja },
+  });
+}
+
 export function registrarUnidadRecurso(datos) {
   return api("/recursos", { method: "POST", body: datos });
 }

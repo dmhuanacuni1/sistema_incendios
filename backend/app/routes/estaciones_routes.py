@@ -26,3 +26,10 @@ def foto(id_estacion):
 @rol_requerido("ADMINISTRADOR")
 def registrar():
     return estaciones_controller.ctrlCURegistrarEstacion()
+
+
+@estaciones_bp.route("/<int:id_estacion>", methods=["PATCH", "PUT"])
+@rol_requerido("ADMINISTRADOR")
+def actualizar(id_estacion):
+    """Editar datos/foto y alternar baja lógica; nunca elimina la fila."""
+    return estaciones_controller.ctrlActualizarEstacion(id_estacion)

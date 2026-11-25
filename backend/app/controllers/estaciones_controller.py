@@ -31,7 +31,8 @@ def ctrlObtenerFotoEstacion(id_estacion):
     return Response(
         contenido,
         mimetype=mimetype,
-        headers={"Cache-Control": "private, max-age=300"},
+        # La foto se reemplaza desde el modal: evitar que el navegador sirva una copia vieja.
+        headers={"Cache-Control": "no-store"},
     )
 
 
@@ -49,6 +50,22 @@ def ctrlCURegistrarEstacion():
             }
         ),
         201,
+    )
+
+
+def ctrlActualizarEstacion(id_estacion):
+    """Edita datos, foto y/o estado (baja lógica) de una estación."""
+    try:
+        estacion = estaciones_service.actualizar_estacion(id_estacion, _datos())
+    except ErrorModulo as exc:
+        return _error(exc)
+    mensaje = (
+        "Estación dada de baja. La ficha se conserva en el sistema."
+        if estacion.estado == "DE_BAJA"
+        else "Estación actualizada correctamente"
+    )
+    return jsonify(
+        {"mensaje": mensaje, "estacion": estacion_a_dict(estacion)}
     )
 
 

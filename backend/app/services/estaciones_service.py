@@ -7,6 +7,7 @@ la unicidad se valida por (`nombre`, `direccion`).
 import base64
 import re
 import unicodedata
+from datetime import datetime, timezone
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import defer
@@ -26,7 +27,7 @@ FOTO_RE = re.compile(
 )
 # Las altas se comprimen en el navegador; el límite evita volver a llenar el TOAST.
 FOTO_ALTA_RE = re.compile(
-    r"^data:image/(?:png|jpe?g|webp);base64,([A-Za-z0-9+/]+={0,2})$", re.I
+    r"^data:image/(?:png|jpe?g|webp);base64,(?P<datos>[A-Za-z0-9+/]+={0,2})$", re.I
 )
 MAX_FOTO_BYTES = 700_000
 
@@ -41,6 +42,8 @@ ESTADOS_RECURSO = (
     "DE_BAJA",
 )
 ESTADOS_CON_MOTIVO = ("MANTENIMIENTO", "FUERA_DE_SERVICIO", "DE_BAJA", "DANADO")
+# La baja de estaciones NO elimina la fila: solo cambia este estado.
+ESTADOS_ESTACION = ("ACTIVA", "DE_BAJA")
 TIPOS_RECURSO = ("equipo", "herramienta", "insumo")
 
 
@@ -83,6 +86,26 @@ def normalizar_estado(valor):
     if codigo not in ESTADOS_UNIDAD + ESTADOS_RECURSO:
         raise ErrorModulo("Estado: no es un estado válido", "estado")
     return codigo
+
+
+def normalizar_estado_estacion(valor):
+    """Acepta el código de la BD y alias usados por la interfaz."""
+    texto_plano = unicodedata.normalize("NFKD", str(valor)).encode("ascii", "ignore").decode()
+    codigo = re.sub(r"[\s\-]+", "_", texto_plano.strip()).strip("_").upper()
+    alias = {"ACTIVO": "ACTIVA", "INACTIVO": "DE_BAJA", "BAJA": "DE_BAJA"}
+    codigo = alias.get(codigo, codigo)
+    if codigo not in ESTADOS_ESTACION:
+        raise ErrorModulo("Estado: usa ACTIVA o DE_BAJA", "estado")
+    return codigo
+
+
+def estado_estacion_desde(datos):
+    """El estado puede enviarse como texto o como booleano `activo`."""
+    if "estado" in datos and datos["estado"] not in (None, ""):
+        return normalizar_estado_estacion(datos["estado"])
+    if isinstance(datos.get("activo"), bool):
+        return "ACTIVA" if datos["activo"] else "DE_BAJA"
+    return None
 
 
 def _telefono(data):
@@ -184,6 +207,7 @@ def crear_estacion(data, administrador):
         direccion=direccion,
         telefono=telefono,
         foto_url=foto_url,
+        estado="ACTIVA",
         id_administrador=administrador.persona.id_persona,
     )
     db.session.add(estacion)
@@ -193,6 +217,80 @@ def crear_estacion(data, administrador):
         db.session.rollback()
         raise ErrorModulo("No se pudo guardar la estación. Intenta de nuevo", codigo=500)
     estacion.tiene_foto = foto_url is not None
+    return estacion
+
+
+def actualizar_estacion(id_estacion, datos):
+    """Edita una estación existente; `estado=DE_BAJA` es baja lógica (no DELETE).
+
+    Acepta campos parciales: los que no vienen se conservan. Enviar `foto_url`
+    vacío quita la foto; no enviarlo la deja intacta.
+    """
+    if not isinstance(datos, dict):
+        raise ErrorModulo("Los datos de la estación no son válidos")
+
+    estacion = db.session.get(Estacion, id_estacion)
+    if estacion is None:
+        raise ErrorModulo("Estación no encontrada", codigo=404)
+
+    cambios = {}
+    if "nombre" in datos:
+        cambios["nombre"] = texto(datos, "nombre", "Nombre", 100)
+    if "direccion" in datos:
+        cambios["direccion"] = texto(datos, "direccion", "Dirección", 255)
+    if "telefono" in datos:
+        cambios["telefono"] = _telefono(datos)
+    if "foto_url" in datos:
+        cambios["foto_url"] = _foto(datos)
+
+    estado = estado_estacion_desde(datos)
+    if estado is not None:
+        cambios["estado"] = estado
+        if estado == "DE_BAJA":
+            motivo = datos.get("motivo_baja")
+            if motivo is not None and not isinstance(motivo, str):
+                raise ErrorModulo("Motivo de baja: debe ser texto", "motivo_baja")
+            motivo = (motivo or "").strip() or "Baja registrada desde el sistema"
+            if len(motivo) > 500:
+                raise ErrorModulo(
+                    "Motivo de baja: admite como máximo 500 caracteres", "motivo_baja"
+                )
+            cambios["motivo_baja"] = motivo
+            cambios["fecha_baja"] = datetime.now(timezone.utc)
+        else:
+            cambios["motivo_baja"] = None
+            cambios["fecha_baja"] = None
+
+    nombre = cambios.get("nombre", estacion.nombre)
+    direccion = cambios.get("direccion", estacion.direccion)
+    repetida = (
+        db.session.query(Estacion)
+        .filter(db.func.lower(Estacion.nombre) == nombre.lower())
+        .filter(db.func.lower(Estacion.direccion) == direccion.lower())
+        .filter(Estacion.id_estacion != id_estacion)
+        .first()
+    )
+    if repetida is not None:
+        raise ErrorModulo(
+            "Nombre: ya existe otra estación con ese nombre y dirección", "nombre"
+        )
+
+    for campo, valor in cambios.items():
+        setattr(estacion, campo, valor)
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        raise ErrorModulo("No se pudo actualizar la estación. Intenta de nuevo", codigo=500)
+
+    if "foto_url" in cambios:
+        estacion.tiene_foto = bool(cambios["foto_url"])
+    else:
+        estacion.tiene_foto = bool(
+            db.session.query(Estacion.foto_url.isnot(None))
+            .filter(Estacion.id_estacion == id_estacion)
+            .scalar()
+        )
     return estacion
 
 

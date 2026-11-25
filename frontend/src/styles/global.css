@@ -1258,6 +1258,7 @@ p.cuenta.estado-pantalla {
 .re-listado-cabecera { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
 .re-listado-cabecera h2 { margin: 0; font-size: 1.1rem; }
 .re-listado-cabecera p { margin: 4px 0 0; font-size: 0.78rem; color: var(--vg-texto-suave); }
+.re-listado-acciones { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .re-listado { width: 100%; display: flex; flex-direction: column; gap: 14px; }
 .re-card {
   width: 100%;
@@ -1305,6 +1306,7 @@ p.cuenta.estado-pantalla {
 }
 .re-badge-disponible,
 .re-estado.disponible { background: var(--vg-brasa); color: var(--vg-ciruela-oscuro); }
+.re-badge-baja { background: #fbeceb; color: var(--vg-terracota); }
 .re-estado.en-mision { background: #fff0de; color: var(--vg-critico); }
 .re-estado.mantenimiento { background: #f3ebef; color: var(--vg-terracota); }
 .re-estado.fuera-servicio { background: #fbeceb; color: var(--vg-terracota); }
@@ -1542,6 +1544,72 @@ p.cuenta.estado-pantalla {
   font-size: 0.7rem;
 }
 
+/* Edición, foto y baja lógica de estaciones. */
+.me-estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(247, 148, 51, 0.9);
+  color: var(--vg-ciruela-oscuro);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.me-estado-badge-baja { background: #fbeceb; color: var(--vg-terracota); }
+.me-estado-badge .vg-punto { width: 6px; height: 6px; }
+.me-admin-estacion {
+  padding: 14px 16px;
+  border: 1px solid var(--vg-borde);
+  border-radius: 15px;
+  background: var(--vg-fondo);
+}
+.me-resumen-estado { margin: 0 0 10px; font-size: 0.74rem; color: var(--vg-texto-suave); }
+.me-motivo { max-width: 420px; margin-bottom: 10px; }
+.me-acciones-admin { flex-wrap: wrap; gap: 10px; }
+.me-boton-baja {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid #d89b93;
+  border-radius: 999px;
+  background: #fbeceb;
+  color: var(--vg-terracota);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.me-boton-baja:hover { background: var(--vg-terracota); color: #ffffff; }
+.me-edicion-form { display: flex; flex-direction: column; gap: 14px; }
+.me-edicion-foto {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--vg-borde);
+}
+.me-edicion-foto img {
+  width: 110px;
+  height: 82px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--vg-borde);
+}
+.me-edicion-foto > span { font-size: 0.7rem; color: var(--vg-texto-suave); }
+.me-edicion-foto .vg-campo { flex: 1; min-width: 220px; }
+.me-edicion-foto small { display: block; margin-top: 3px; font-size: 0.65rem; color: var(--vg-texto-suave); }
+.me-edicion-foto .est-foto-nombre { color: var(--vg-critico); font-weight: 700; }
+.me-edicion-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.me-edicion-campos > :last-child { grid-column: 1 / -1; }
+
 /* Fotos de estaciones: mismo lenguaje visual del acceso. */
 .re-card-foto {
   position: relative;
@@ -1668,6 +1736,8 @@ p.cuenta.estado-pantalla {
   .re-card-lado { width: 100%; justify-content: space-between; }
   .re-card-secciones { grid-template-columns: 1fr; }
   .me-asignar { flex-direction: column; align-items: stretch; }
+  .me-edicion-campos { grid-template-columns: 1fr; }
+  .me-edicion-campos > :last-child { grid-column: auto; }
   .me-asignar .vg-campo { width: 100%; }
   .est-foto-form { grid-template-columns: 1fr; }
   .est-foto-form-vista { height: 130px; }

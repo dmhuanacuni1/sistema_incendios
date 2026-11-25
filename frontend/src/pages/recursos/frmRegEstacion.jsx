@@ -2,37 +2,19 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Campo from "../../components/common/Campo";
 import AppLayout from "../../components/layout/AppLayout";
+import { useVigia } from "../../context/VigiaContext";
+import {
+  comprimirImagen,
+  MAX_ARCHIVO_IMAGEN,
+  TIPOS_ACEPTADOS_IMAGEN,
+} from "../../components/recursos/comprimirImagen";
 import { FOTO_ESTACION_PREDETERMINADA } from "../../components/recursos/fotoEstacion";
 import * as estacionesService from "../../services/estacionesService";
 
 const VACIO = { nombre: "", direccion: "", telefono: "", foto_url: "" };
-const TIPOS_ACEPTADOS = /^image\/(png|jpeg|webp)$/i;
-const LADO_MAXIMO = 1200;
-const CALIDAD_WEBP = 0.82;
-
-/** Reduce la foto en el navegador para no guardar base64 innecesariamente grande. */
-function comprimirImagen(archivo) {
-  return new Promise((resolver, rechazar) => {
-    const lector = new FileReader();
-    lector.onerror = () => rechazar(new Error("No se pudo leer la imagen."));
-    lector.onload = () => {
-      const imagen = new Image();
-      imagen.onerror = () => rechazar(new Error("No se pudo abrir la imagen."));
-      imagen.onload = () => {
-        const escala = Math.min(1, LADO_MAXIMO / Math.max(imagen.width, imagen.height));
-        const lienzo = document.createElement("canvas");
-        lienzo.width = Math.round(imagen.width * escala);
-        lienzo.height = Math.round(imagen.height * escala);
-        lienzo.getContext("2d").drawImage(imagen, 0, 0, lienzo.width, lienzo.height);
-        resolver(lienzo.toDataURL("image/webp", CALIDAD_WEBP));
-      };
-      imagen.src = String(lector.result);
-    };
-    lector.readAsDataURL(archivo);
-  });
-}
 
 export default function FrmRegEstacion() {
+  const { cargarEstaciones } = useVigia();
   const [form, setForm] = useState(VACIO);
   const [error, setError] = useState("");
   const [mensaje, setMensaje] = useState("");
@@ -60,11 +42,11 @@ export default function FrmRegEstacion() {
       event.target.value = "";
     }
 
-    if (!TIPOS_ACEPTADOS.test(archivo.type)) {
+    if (!TIPOS_ACEPTADOS_IMAGEN.test(archivo.type)) {
       rechazar("Formato no soportado. Usa PNG, JPG o WEBP.");
       return;
     }
-    if (archivo.size > 10_000_000) {
+    if (archivo.size > MAX_ARCHIVO_IMAGEN) {
       rechazar("La imagen seleccionada es demasiado grande.");
       return;
     }
@@ -96,9 +78,10 @@ export default function FrmRegEstacion() {
       setMensaje(
         `${respuesta.mensaje || "Estación registrada correctamente"}${
           conFoto ? " La foto quedó guardada en la base de datos." : ""
-        }`
+        } La lista de estaciones ya se actualizó.`
       );
       setForm(VACIO);
+      await cargarEstaciones();
       setNombreFoto("");
       if (inputFoto.current) inputFoto.current.value = "";
     } catch (err) {

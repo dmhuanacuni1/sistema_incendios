@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { invalidarFotoEstacion } from "../components/recursos/ImagenEstacion";
 import * as estacionesService from "../services/estacionesService";
 
 const VigiaContext = createContext(null);
@@ -37,6 +38,36 @@ export function VigiaProvider({ children }) {
       setCargandoEstaciones(false);
     }
   }, []);
+
+  async function editarEstacion(idEstacion, datos) {
+    try {
+      const respuesta = await estacionesService.actualizar(idEstacion, datos);
+      if (Object.prototype.hasOwnProperty.call(datos, "foto_url")) {
+        invalidarFotoEstacion(idEstacion);
+      }
+      await cargarEstaciones();
+      return {
+        ok: true,
+        mensaje: respuesta.mensaje || "Estación actualizada correctamente",
+      };
+    } catch (err) {
+      return { ok: false, error: err.message || "No se pudo actualizar la estación." };
+    }
+  }
+
+  async function cambiarEstadoEstacion(idEstacion, estado, motivoBaja = "") {
+    try {
+      const respuesta = await estacionesService.cambiarEstadoEstacion(
+        idEstacion,
+        estado,
+        motivoBaja
+      );
+      await cargarEstaciones();
+      return { ok: true, mensaje: respuesta.mensaje || "Estado actualizado" };
+    } catch (err) {
+      return { ok: false, error: err.message || "No se pudo cambiar el estado." };
+    }
+  }
 
   useEffect(() => {
     if (!sesion || !puedeVerRecursos) {
@@ -134,6 +165,8 @@ export function VigiaProvider({ children }) {
       abrirEstacion: setIdEstacionSeleccionada,
       cerrarEstacion: () => setIdEstacionSeleccionada(null),
       cargarEstaciones,
+      editarEstacion,
+      cambiarEstadoEstacion,
       cambiarEstadoUnidad,
       ajustarRecurso,
       asignarIncidente,

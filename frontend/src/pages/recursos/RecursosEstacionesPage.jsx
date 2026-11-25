@@ -66,8 +66,12 @@ function TarjetaEstacion({ estacion, onAbrir, esAdmin }) {
             </div>
           </div>
           <div className="re-card-lado">
-            <span className="re-badge-disponible">
-              <i className="vg-punto" /> Disponible
+            <span
+              className={`re-badge-disponible${
+                estacion.estado === "DE_BAJA" ? " re-badge-baja" : ""
+              }`}
+            >
+              <i className="vg-punto" /> {estacion.estado === "DE_BAJA" ? "De baja" : "Disponible"}
             </span>
             <button
               type="button"
@@ -162,7 +166,7 @@ export default function RecursosEstacionesPage() {
 
   const kpis = useMemo(
     () => ({
-      estaciones: estaciones.length,
+      estaciones: estaciones.filter((e) => (e.estado || "ACTIVA") === "ACTIVA").length,
       unidades: estaciones.reduce((total, e) => total + e.unidades.length, 0),
       enBase: estaciones.reduce(
         (total, e) => total + e.unidades.filter((u) => u.estado === "DISPONIBLE").length,
@@ -218,11 +222,22 @@ export default function RecursosEstacionesPage() {
                 : `${estaciones.length} bases operativas en el sistema`}
             </p>
           </div>
-          {busqueda && (
-            <button type="button" className="vg-boton-secundario" onClick={() => setBusqueda("")}>
-              Limpiar filtro
+          <div className="re-listado-acciones">
+            {busqueda && (
+              <button type="button" className="vg-boton-secundario" onClick={() => setBusqueda("")}>
+                Limpiar filtro
+              </button>
+            )}
+            <button
+              type="button"
+              className="vg-boton-secundario"
+              onClick={cargarEstaciones}
+              disabled={cargandoEstaciones}
+              title="Volver a consultar la base de datos"
+            >
+              Actualizar lista
             </button>
-          )}
+          </div>
         </div>
 
         {cargandoEstaciones ? (

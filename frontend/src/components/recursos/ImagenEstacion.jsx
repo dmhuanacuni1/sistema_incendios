@@ -4,6 +4,23 @@ import { FOTO_ESTACION_PREDETERMINADA } from "./fotoEstacion";
 
 // Las fotos se descargan una sola vez por estación y se comparten entre tarjetas y modal.
 const urlsEnCache = new Map();
+const EVENTO_FOTO_CAMBIADA = "estacion:foto-cambiada";
+
+/** Libera la URL anterior y fuerza una nueva descarga tras editar/quitar la foto. */
+export function invalidarFotoEstacion(idEstacion) {
+  const pendiente = urlsEnCache.get(idEstacion);
+  if (pendiente && typeof pendiente.then === "function") {
+    pendiente
+      .then((url) => {
+        if (url) URL.revokeObjectURL(url);
+      })
+      .catch(() => undefined);
+  }
+  urlsEnCache.delete(idEstacion);
+  window.dispatchEvent(
+    new CustomEvent(EVENTO_FOTO_CAMBIADA, { detail: Number(idEstacion) })
+  );
+}
 
 function urlDe(idEstacion) {
   if (!urlsEnCache.has(idEstacion)) {
@@ -26,12 +43,25 @@ export function useImagenEstacion(estacion) {
       setUrl(FOTO_ESTACION_PREDETERMINADA);
       return undefined;
     }
+
     let activo = true;
-    urlDe(id).then((resultado) => {
-      if (activo && resultado) setUrl(resultado);
-    });
+    function cargar() {
+      urlDe(id).then((resultado) => {
+        if (activo) setUrl(resultado || FOTO_ESTACION_PREDETERMINADA);
+      });
+    }
+
+    function alCambiar(evento) {
+      if (Number(evento.detail) !== Number(id)) return;
+      setUrl(FOTO_ESTACION_PREDETERMINADA);
+      cargar();
+    }
+
+    cargar();
+    window.addEventListener(EVENTO_FOTO_CAMBIADA, alCambiar);
     return () => {
       activo = false;
+      window.removeEventListener(EVENTO_FOTO_CAMBIADA, alCambiar);
     };
   }, [id, tieneFoto]);
 

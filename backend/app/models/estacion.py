@@ -15,6 +15,9 @@ class Estacion(db.Model):
     direccion = db.Column(db.String(255), nullable=False)
     telefono = db.Column(db.String(20))
     foto_url = db.Column(db.Text)
+    estado = db.Column(db.String(20), nullable=False, default="ACTIVA", server_default="ACTIVA")
+    motivo_baja = db.Column(db.Text)
+    fecha_baja = db.Column(db.DateTime(timezone=True))
     id_administrador = db.Column(
         db.Integer, db.ForeignKey("personas.id_persona", ondelete="SET NULL")
     )

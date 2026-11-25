@@ -79,6 +79,10 @@ CREATE TABLE estaciones (
     direccion VARCHAR(255) NOT NULL,
     telefono VARCHAR(20),
     foto_url TEXT,
+    -- La baja es lógica: la fila se conserva y solo cambia el estado.
+    estado VARCHAR(20) NOT NULL DEFAULT 'ACTIVA' CHECK (estado IN ('ACTIVA', 'DE_BAJA')),
+    motivo_baja TEXT,
+    fecha_baja TIMESTAMPTZ,
     id_administrador INT REFERENCES personas(id_persona) ON DELETE SET NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
