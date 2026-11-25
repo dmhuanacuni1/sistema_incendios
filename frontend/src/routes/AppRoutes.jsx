@@ -21,6 +21,7 @@ import ZonasRiesgoPage from "../pages/zonas/ZonasRiesgoPage";
 import { IncidentesPage } from "../pages/incidentes/IncidentesPage";
 import HistorialAlertasPage from "../pages/alertas/HistorialAlertasPage";
 import MisAlertasPage from "../pages/alertas/MisAlertasPage";
+import EstadisticasPage from "../pages/estadisticas/EstadisticasPage";
 
 function PantallaCarga() {
   return <p className="cuenta estado-pantalla">Comprobando sesión…</p>;
@@ -107,6 +108,15 @@ export default function AppRoutes() {
       <Route path="/usuarios" element={<RutaPrivada soloAdmin><UsuariosPage /></RutaPrivada>} />
       <Route path="/incidentes" element={<IncidentesPage />} />
       <Route path="/emergencia" element={<IncidentesPage />} />
+      {/* Iteracion 7: Estadisticas e Informes. */}
+<Route
+  path="/estadisticas"
+  element={
+    <RutaPrivada soloAdmin>
+      <EstadisticasPage />
+    </RutaPrivada>
+  }
+/>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

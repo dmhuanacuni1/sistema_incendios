@@ -35,6 +35,7 @@ export default function VigiaSidebar({ usuario, pathname, onSalir }) {
   const enIncidentes =
     pathname.startsWith("/incidentes") || pathname.startsWith("/emergencia");
   const enUsuarios = pathname.startsWith("/usuarios");
+  const enEstadisticas = pathname.startsWith("/estadisticas");
   const esCiudadanoVista = rol === "CIUDADANO" || rolActivo === "CIUDADANO";
   const esBomberoVista = rol === "BOMBERO" || rolActivo === "BOMBERO";
   const enAlertas = pathname.startsWith("/alertas");
@@ -265,6 +266,21 @@ export default function VigiaSidebar({ usuario, pathname, onSalir }) {
                   <span className="vg-nav-numero">3</span>
                   <Icono nombre="campana" tamano={18} />
                   <span className="vg-nav-texto">Mis Notificaciones</span>
+                </Link>
+              </li>
+            )}
+            {rol === "ADMINISTRADOR" && (
+              <li>
+                <Link
+                  to="/estadisticas"
+                  className={`vg-nav-enlace${enEstadisticas ? " activo" : ""}`}
+                  onClick={() => setSidebarAbierto(false)}
+                  title={colapsado ? "Estadísticas e informes" : undefined}
+                  aria-current={enEstadisticas ? "page" : undefined}
+                >
+                  <span className="vg-nav-numero">6</span>
+                  <Icono nombre="capas" tamano={18} />
+                  <span className="vg-nav-texto">Estadísticas e informes</span>
                 </Link>
               </li>
             )}

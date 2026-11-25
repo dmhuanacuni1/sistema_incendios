@@ -15,6 +15,7 @@ const TITULOS = [
   ["/brigadas", "Gestión de Brigadas"],
   ["/incidentes", "Incidentes y Emergencias"],
   ["/emergencia", "Emergencias SOS"],
+  ["/estadisticas", "Estadísticas e informes"],
   ["/usuarios", "Usuarios"],
   ["/cuenta", "Mi cuenta"],
 ];

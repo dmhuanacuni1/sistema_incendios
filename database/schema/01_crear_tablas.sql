@@ -16,6 +16,8 @@ DROP TABLE IF EXISTS recursos CASCADE;
 DROP TABLE IF EXISTS unidades CASCADE;
 DROP TABLE IF EXISTS estaciones CASCADE;
 DROP TABLE IF EXISTS zonas_riesgo CASCADE;
+DROP TABLE IF EXISTS contenido_reportes CASCADE;
+DROP TABLE IF EXISTS archivos_reportes CASCADE;
 DROP TABLE IF EXISTS reportes CASCADE;
 DROP TABLE IF EXISTS usuarios CASCADE;
 DROP TABLE IF EXISTS roles CASCADE;
@@ -203,6 +205,49 @@ CREATE TABLE reportes (
     periodo VARCHAR(50) NOT NULL,
     formato VARCHAR(20) NOT NULL CHECK (formato IN ('PDF', 'EXCEL', 'CSV', 'JSON')),
     archivo_url TEXT
+);
+
+-- Almacenamiento de documentos originales PDF y Excel
+CREATE TABLE archivos_reportes (
+    id_reporte INTEGER PRIMARY KEY,
+    nombre_archivo VARCHAR(255) NOT NULL,
+    tipo_mime VARCHAR(150) NOT NULL,
+    contenido BYTEA NOT NULL,
+    tamano_bytes BIGINT NOT NULL,
+
+    CONSTRAINT fk_archivos_reportes
+        FOREIGN KEY (id_reporte)
+        REFERENCES reportes(id_reporte)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_tamano_archivo
+        CHECK (
+            tamano_bytes > 0
+            AND tamano_bytes = octet_length(contenido)
+        )
+);
+
+-- Contenido original de los informes - Iteracion 7
+
+CREATE TABLE contenido_reportes (
+    id_reporte INTEGER PRIMARY KEY,
+
+    datos JSONB NOT NULL,
+
+    nombre_administrador VARCHAR(255) NOT NULL,
+
+    version_contenido INTEGER NOT NULL DEFAULT 1,
+
+    CONSTRAINT fk_contenido_reportes
+        FOREIGN KEY (id_reporte)
+        REFERENCES reportes(id_reporte)
+        ON DELETE CASCADE,
+
+    CONSTRAINT chk_contenido_reportes_datos
+        CHECK (jsonb_typeof(datos) = 'object'),
+
+    CONSTRAINT chk_version_contenido
+        CHECK (version_contenido > 0)
 );
 
 -- =============================================================================

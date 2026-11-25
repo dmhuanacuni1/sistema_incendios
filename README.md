@@ -98,6 +98,10 @@ El módulo de Alertas y Notificaciones usa `backend/migrations/006_alertas_notif
 crea `tipos_alerta`, `alertas` y `alerta_destinatarios`, carga las tres plantillas de mensaje y
 también se puede volver a ejecutar sin borrar datos.
 
+El módulo de Estadísticas e Informes usa `backend/migrations/007_estadisticas_informes.sql`:
+garantiza `reportes`, `archivos_reportes`, `contenido_reportes` y el índice de fecha de generación
+sin eliminar datos. Es aditiva y re-ejecutable.
+
 ## Ramas e iteraciones
 
 `main` ya incluye la iteración 1 (usuarios, vía PR #1) y la iteración 2
