@@ -1,8 +1,32 @@
 """Modelo de almacenamiento del contenido original de informes."""
 
+from sqlalchemy import event, text
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.schema import CheckConstraint
 
 from app.config.database import db
+
+
+@compiles(JSONB, "sqlite")
+def _compilar_jsonb_como_json_en_sqlite(type_, compiler, **kw):
+    # SQLite no tiene JSONB; las pruebas aisladas usan JSON nativo.
+    return "JSON"
+
+
+@event.listens_for(db.Model.metadata, "before_create", named="sqlite_contenido_checks")
+def _checks_sqlite(target, connection, **kw):
+    if connection.dialect.name != "sqlite":
+        return
+    tabla = target.tables.get("contenido_reportes")
+    if tabla is None:
+        return
+    for constraint in tabla.constraints:
+        if (
+            isinstance(constraint, CheckConstraint)
+            and constraint.name == "chk_contenido_reportes_datos"
+        ):
+            constraint.sqltext = text("json_type(datos) = 'object'")
 
 
 class ContenidoReporte(db.Model):

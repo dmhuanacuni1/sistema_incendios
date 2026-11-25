@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AppLayout from "../../components/layout/AppLayout";
 import Icono from "../../components/layout/IconosVigia";
 import { useAuth } from "../../hooks/useAuth";
+import { usePolling } from "../../hooks/usePolling";
 import { useOperacion } from "../../context/OperacionContext";
 import { avisosService, incidentesService } from "../../services/incidentesService";
 import * as brigadasService from "../../services/brigadasService";
@@ -219,6 +220,20 @@ export default function DashboardPage() {
   const esBombero = rol === "BOMBERO";
   const esCiudadano = rol === "CIUDADANO";
   const idPersona = usuario?.persona?.id_persona;
+
+  // El ciudadano puede reportar desde otro tab o desde el portal; sin este
+  // refresco el KPI "Mis avisos" se queda con el valor que tenía al entrar.
+  usePolling(
+    () => {
+      if (!esCiudadano) return;
+      avisosService
+        .mios()
+        .then((r) => setDatos((prev) => ({ ...prev, avisos: r.data || [] })))
+        .catch(() => {});
+    },
+    8000,
+    esCiudadano
+  );
 
   useEffect(() => {
     let vivo = true;

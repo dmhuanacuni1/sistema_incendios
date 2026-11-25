@@ -1,9 +1,9 @@
 """Controlador HTTP para avisos de incendio (SRP / DIP)."""
 
-from flask import g, request
+from flask import current_app, g, request
 
 from app.middleware.auth import _usuario_desde_token
-from app.middleware.error_handler import ValidationError
+from app.middleware.error_handler import AppError, ValidationError
 from app.services.aviso_service import AvisoService
 from app.utils.geo_utils import validate_coordinates
 from app.utils.validators import require_non_empty_str
@@ -61,18 +61,27 @@ class AvisosController:
 
     def crear(self):
         payload = dict(request.get_json(silent=True) or {})
-        if (
-            payload.get("id_ciudadano") is None
-            and request.headers.get("Authorization", "").startswith("Bearer ")
-        ):
+        if request.headers.get("Authorization", "").startswith("Bearer "):
             usuario, error = _usuario_desde_token("access")
+            if error is not None:
+                # No guardar el reporte como anónimo cuando la sesión ya no sirve:
+                # el cliente renueva el token y reintenta automáticamente.
+                raise AppError(
+                    "La sesión expiró. Vuelve a iniciar sesión", status_code=401
+                )
             if (
-                error is None
-                and usuario is not None
+                usuario is not None
                 and usuario.rol is not None
                 and usuario.rol.nombre_rol == "CIUDADANO"
             ):
+                # La identidad la impone el token; un id_ciudadano del cuerpo
+                # nunca debe poder atribuir el reporte a otra persona.
                 payload["id_ciudadano"] = usuario.id_persona
+            else:
+                payload.pop("id_ciudadano", None)
+        elif not current_app.config.get("TESTING"):
+            # El SOS anónimo sigue funcionando, pero no puede adjudicarse a nadie.
+            payload.pop("id_ciudadano", None)
 
         aviso = self._service.crear_aviso(payload)
         

@@ -379,7 +379,15 @@ export function IncidentesPage() {
 
   async function handleCrearAviso(data) {
     await run(async () => {
-      const res = await avisosService.crear(data);
+      // El reporte del ciudadano autenticado debe quedar asociado a su persona;
+      // si no, /api/avisos/mios nunca lo devuelve y el contador sigue en 0.
+      const idCiudadano = esCiudadanoAutenticado
+        ? usuarioAutenticado?.persona?.id_persona
+        : null;
+      const res = await avisosService.crear({
+        ...data,
+        ...(idCiudadano ? { id_ciudadano: idCiudadano } : {}),
+      });
       const creado = res.data;
       if (esCiudadano && creado) {
         setMisAvisos((prev) => [
@@ -431,7 +439,6 @@ export function IncidentesPage() {
       ubicacion: refUbicacion,
       descripcion,
       nivel_urgencia,
-      id_ciudadano: null,
       lat: coords.lat,
       lng: coords.lng,
     });
@@ -967,7 +974,9 @@ export function IncidentesPage() {
   }, [estaciones]);
 
   const badgeMapa = alertasCriticas.length || incidentesActivosLista.length || null;
-  const badgeAvisos = avisosPendientes.length || null;
+  const badgeAvisos = esCiudadano
+    ? misAvisos.length || null
+    : avisosPendientes.length || null;
   const badgeIncidentes = incidentes.length || null;
   const badgeDetalle = incidenteSeleccionado
     ? `#${incidenteSeleccionado.id_incidente}`
