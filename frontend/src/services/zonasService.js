@@ -47,8 +47,19 @@ export function listarSolicitudesPendientes() {
   return api("/solicitudes-zonas/pendientes");
 }
 
-export function evaluarSolicitud(id, estado, observacion) {
-  return api(`/solicitudes-zonas/${id}/evaluacion`, { method: "PATCH", body: { estado, observacion } });
+export function listarTodasSolicitudes(estado = "") {
+  return api(`/solicitudes-zonas${estado ? `?estado=${encodeURIComponent(estado)}` : ""}`);
+}
+
+export function evaluarSolicitud(id, estado, observacion, nivel_riesgo_final) {
+  return api(`/solicitudes-zonas/${id}/evaluacion`, {
+    method: "PATCH",
+    body: { estado, observacion, nivel_riesgo_final },
+  });
+}
+
+export function eliminarSolicitud(id) {
+  return api(`/solicitudes-zonas/${id}`, { method: "DELETE" });
 }
 
 export function registrarInspeccion(datos) {
@@ -59,6 +70,18 @@ export function listarInspecciones(idZona) {
   return api(`/inspecciones/zona/${idZona}`);
 }
 
+export function listarTodasInspecciones() {
+  return api("/inspecciones");
+}
+
 export function emitirAlertaZona(idZona, datos) {
   return api(`/zonas-riesgo/${idZona}/alerta`, { method: "POST", body: datos });
+}
+
+export function listarFocosSatelitales(dias = 1, refrescar = false) {
+  return api(`/zonas-riesgo/focos-satelitales?days=${dias}${refrescar ? "&refresh=1" : ""}`);
+}
+
+export function listarAreasQuemadas() {
+  return api("/zonas-riesgo/areas-quemadas");
 }

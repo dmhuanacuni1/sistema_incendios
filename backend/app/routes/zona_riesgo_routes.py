@@ -17,6 +17,10 @@ zona_riesgo_bp.add_url_rule("", view_func=zona_riesgo_controller.crear_zona, met
 # CU09: Focos de calor satelitales (ruta fija antes de <id_zona> para evitar colision)
 zona_riesgo_bp.add_url_rule("/focos-calor", view_func=zona_riesgo_controller.listar_focos_calor, methods=["GET"])
 
+# Mapa general: focos de calor satelitales y areas quemadas (todos los roles)
+zona_riesgo_bp.add_url_rule("/focos-satelitales", view_func=zona_riesgo_controller.focos_satelitales, methods=["GET"])
+zona_riesgo_bp.add_url_rule("/areas-quemadas", view_func=zona_riesgo_controller.areas_quemadas, methods=["GET"])
+
 # Resolucion de enlaces de Google Maps a coordenadas GPS
 zona_riesgo_bp.add_url_rule("/resolver-ubicacion", view_func=zona_riesgo_controller.resolver_ubicacion, methods=["POST"])
 

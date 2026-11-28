@@ -16,6 +16,15 @@ def crear():
 
 
 @rol_requerido("BOMBERO", "ADMINISTRADOR", "OPERADOR")
+def listar():
+    id_zona_raw = request.args.get("id_zona")
+    id_zona = int(id_zona_raw) if id_zona_raw and id_zona_raw.isdigit() else None
+    nivel = request.args.get("nivel")
+    data = [i.to_dict() for i in inspecciones_service.listar_todas(id_zona=id_zona, nivel=nivel)]
+    return jsonify({"ok": True, "data": data, "total": len(data)}), 200
+
+
+@rol_requerido("BOMBERO", "ADMINISTRADOR", "OPERADOR")
 def por_zona(id_zona):
     data = [i.to_dict() for i in inspecciones_service.listar_por_zona(id_zona)]
     return jsonify({"ok": True, "data": data, "total": len(data)}), 200

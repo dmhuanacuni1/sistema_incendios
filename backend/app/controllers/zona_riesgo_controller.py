@@ -4,7 +4,7 @@ Manejo de errores HTTP y serializacion de respuestas.
 """
 
 from flask import request, jsonify, g
-from app.services import riesgo_service
+from app.services import mapa_service, riesgo_service
 from app.middleware.auth import rol_requerido
 
 
@@ -43,6 +43,7 @@ def actualizar_zona(id_zona):
         payload = request.get_json(silent=True)
         if not isinstance(payload, dict):
             return jsonify({"ok": False, "error": "Debe enviar los cambios como un objeto JSON"}), 400
+        payload.setdefault("id_usuario", g.usuario.id_usuario)
         zona = riesgo_service.actualizar_zona(id_zona, payload)
         if not zona:
             return jsonify({"ok": False, "error": "Zona no encontrada"}), 404
@@ -122,6 +123,32 @@ def resolver_ubicacion():
         return jsonify({"ok": True, "data": coords}), 200
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@rol_requerido("ADMINISTRADOR", "OPERADOR", "BOMBERO", "CIUDADANO")
+def focos_satelitales():
+    """GET /api/zonas-riesgo/focos-satelitales - Focos de calor (NASA FIRMS) para el mapa general."""
+    try:
+        dias = max(1, min(int(request.args.get("days", 1)), 5))
+        refrescar = request.args.get("refresh", "").lower() in ("1", "true", "si")
+        return jsonify({"ok": True, "data": mapa_service.obtener_focos_satelitales(dias, refrescar)}), 200
+    except ValueError:
+        return jsonify({"ok": False, "error": "El parámetro 'days' debe ser un entero"}), 400
+    except Exception:
+        from flask import current_app
+        current_app.logger.exception("Error al consultar focos satelitales")
+        return jsonify({"ok": False, "error": "No se pudieron consultar los focos de calor"}), 500
+
+
+@rol_requerido("ADMINISTRADOR", "OPERADOR", "BOMBERO", "CIUDADANO")
+def areas_quemadas():
+    """GET /api/zonas-riesgo/areas-quemadas - Historial de incendios y superficie quemada."""
+    try:
+        return jsonify({"ok": True, "data": mapa_service.obtener_areas_quemadas()}), 200
+    except Exception:
+        from flask import current_app
+        current_app.logger.exception("Error al consultar áreas quemadas")
+        return jsonify({"ok": False, "error": "No se pudieron consultar las áreas quemadas"}), 500
 
 
 @rol_requerido("ADMINISTRADOR", "OPERADOR", "BOMBERO")

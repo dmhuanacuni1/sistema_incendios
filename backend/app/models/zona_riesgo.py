@@ -40,6 +40,21 @@ class ZonaRiesgo(db.Model):
     NIVELES_VALIDOS = ("BAJO", "MEDIO", "ALTO", "EXTREMO")
     ESTADOS_VALIDOS = ("Activa", "Inactiva", "Alerta Emitida")
 
+    def _centro(self):
+        """Latitud/longitud de referencia: centro de los puntos guardados en `coordenadas`."""
+        puntos = []
+        for p in self.coordenadas or []:
+            try:
+                puntos.append((float(p["lat"]), float(p["lng"])))
+            except (TypeError, KeyError, ValueError):
+                continue
+        if not puntos:
+            return (None, None)
+        return (
+            round(sum(p[0] for p in puntos) / len(puntos), 6),
+            round(sum(p[1] for p in puntos) / len(puntos), 6),
+        )
+
     def to_dict(self, incluir_incidentes=False):
         data = {
             "id_zona": self.id_zona,
@@ -49,6 +64,8 @@ class ZonaRiesgo(db.Model):
             "descripcion": self.descripcion,
             "id_administrador": self.id_administrador,
             "coordenadas": self.coordenadas or [],
+            "latitud": self._centro()[0],
+            "longitud": self._centro()[1],
             "tipo_vegetacion": self.tipo_vegetacion,
             "area_hectareas": float(self.area_hectareas) if self.area_hectareas else 0.0,
             "estado": self.estado,
